@@ -1,5 +1,8 @@
-// This file manages the games client's logic. It's here that Socket.io connections are handled
-// and functions from canvas.js are used to manage the game's visual appearance.
+/**
+ * This file manages the games client's logic. It's here that
+ * Socket.io connections are handled and functions from canvas.js
+ * are used to manage the game's visual appearance.
+ */
 
 var socket = io();
 var canPlayCard = false;
@@ -22,6 +25,7 @@ socket.on("unknown card played", function() {
 });
 
 socket.on("fight result", function(result) {
+	// result value is coming from game_manager's processMatch function
 	displayResult(result);
 });
 
@@ -44,16 +48,28 @@ socket.on("no rematch", function() {
 });
 
 //////////  Functions  \\\\\\\\\\
+/**
+ * Called when a player clicks to search for a lobby
+ */
 function enterQueue() {
+	console.log("In client's enterQueue method");
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
+	// Setting up display for user
 	socket.emit("enter queue");
 	labels["play"].visible = false;
 	labels["play"].clickable = false;
 	labels["searching"].visible = true;
 }
 
+/**
+ * Called when the player enters a new match
+ */
 function enterMatch() {
+	console.log("In client's enterMatch method");
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
+	// Set up player's game screen
 	playerPoints = [];
 	opponentPoints = [];
 	labels["result"].visible = false;
@@ -63,7 +79,7 @@ function enterMatch() {
 	labels["rematch"].clickable = false;
 	labels["rematch"].disabled = false;
 	labels["waiting"].visible = false;
-	labels["timer"].text = 20;
+	labels["timer"].text = 60;
 	labels["timer"].visible = true;
 	timerInterval = setInterval(updateTimer, 1000);
 	resetDots(labels["waiting"]);
@@ -73,8 +89,13 @@ function enterMatch() {
 	displayCardSlots = true;
 }
 
+/**
+ * Called when a change has been made by the server to the player's cards
+ * @param cards	The new cards for the player
+ */
 function updateCards(cards) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
 	for (var i = 0; i < cards.length; i++) {
 		handSlots[i].card = cards[i];
 	}
@@ -94,10 +115,14 @@ function unknownCardPlayed() {
 	opponentCard = {isUnknown: true};
 }
 
+// Called at the end of the match to display the results
 function displayResult(result) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	var player = undefined;
 	var opponent = undefined;
+
+	// Check if this user's socketId matches the winning socketId
+	// TODO: update this to check if user is a winner based on their team id
 	if (result.winner.socketId === socket.id) {
 		player = result.winner;
 		opponent = result.loser;
