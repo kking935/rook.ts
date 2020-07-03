@@ -72,3 +72,6 @@ Thumbs.db
 
 # Entire databae directory
 data
+
+# Webstorm files
+.idea/

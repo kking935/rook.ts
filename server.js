@@ -1,5 +1,6 @@
-// This file starts the both the Express server, used to serve the actual webpage,
-// and the Socket.io server, used to handle the the realtime connection to the client.
+// This file starts both the Express server, used to serve the
+// actual webpage, and the Socket.io server, used to handle
+// the realtime connection to the client.
 
 var express = require("express");
 var app = express();
@@ -12,6 +13,7 @@ app.use(express.static("public"));  // Staticly serve pages, using directory 'pu
 // User connects to server
 app.get("/", function(req, res) {
 	// Will serve static pages, no need to handle requests
+	console.log('new user connected');
 });
 
 // If any page not handled already handled (ie. doesn't exists)

@@ -8,12 +8,16 @@ canvas {
 	margin: 5%;
 }
 
-@font-face {
-    font-family: "ChineseTakeaway";
-    src: url("../fonts/ChineseTakeaway.ttf");
+.page {
+    background-color: lightgray;
+    padding: 50px 0px;
+    min-height: 100vh;
 }
 
 @font-face {
-    font-family: "RagingRedLotusBB";
-    src: url("../fonts/RagingRedLotusBB.ttf");
+    font-family: "3ds";
+}
+
+@font-face {
+    font-family: "3ds";
 }
