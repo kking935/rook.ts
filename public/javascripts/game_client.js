@@ -141,7 +141,7 @@ function displayResult(result) {
 			canPlayCard = true;
 			opponentCard = undefined;
 			playerCard = undefined;
-			labels["timer"].text = 20;
+			labels["timer"].text = 60;
 			timerInterval = setInterval(updateTimer, 1000);
 			canPlayCard = true;
 			socket.emit("request cards update");
@@ -175,7 +175,7 @@ function endMatch() {
 	labels["main menu"].visible = true;
 	labels["main menu"].clickable = true;
 	labels["timer"].visible = false;
-	labels["timer"].text = 20;
+	labels["timer"].text = 60;
 	clearInterval(timerInterval);
 	matchWinner = undefined;
 	matchEndReason = undefined;
