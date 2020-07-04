@@ -8,6 +8,9 @@ var playerPoints = [],
 	opponentPoints = [];
 var opponentCard, playerCard, matchWinner, matchEndReason, readyToEnd, timerInterval;
 
+// Set the countdown timer
+const turnTimer = 60;
+
 //////////  Socket Events  \\\\\\\\\\
 socket.on("enter match", function() {
 	enterMatch();
@@ -63,7 +66,7 @@ function enterMatch() {
 	labels["rematch"].clickable = false;
 	labels["rematch"].disabled = false;
 	labels["waiting"].visible = false;
-	labels["timer"].text = 20;
+	labels["timer"].text = turnTimer;
 	labels["timer"].visible = true;
 	timerInterval = setInterval(updateTimer, 1000);
 	resetDots(labels["waiting"]);
@@ -116,7 +119,7 @@ function displayResult(result) {
 			canPlayCard = true;
 			opponentCard = undefined;
 			playerCard = undefined;
-			labels["timer"].text = 20;
+			labels["timer"].text = turnTimer;
 			timerInterval = setInterval(updateTimer, 1000);
 			canPlayCard = true;
 			socket.emit("request cards update");
@@ -150,7 +153,7 @@ function endMatch() {
 	labels["main menu"].visible = true;
 	labels["main menu"].clickable = true;
 	labels["timer"].visible = false;
-	labels["timer"].text = 20;
+	labels["timer"].text = turnTimer;
 	clearInterval(timerInterval);
 	matchWinner = undefined;
 	matchEndReason = undefined;
