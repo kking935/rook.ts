@@ -32,7 +32,7 @@ function init() {
 			card: undefined
 		});
 	}
-	labels["logo"] = new Label({x: 0.5, y: 0.3}, "Card Fu", 192, true, false, false, "ChineseTakeaway");
+	labels["logo"] = new Label({x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, "ChineseTakeaway");
 	labels["play"] = new Label({x: 0.5, y: 0.7}, "Play!", 144, true, true, false, labelFont, enterQueue);
 	labels["searching"] = new Label({x: 0.5, y: 0.7}, "Searching   ", 144, false, false, false, labelFont);
 	labels["result"] = new Label({x: 0.5, y: 0.3}, "", 192, false, false, false, labelFont);
