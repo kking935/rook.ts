@@ -20,6 +20,10 @@ socket.on("update cards", function(cards) {
 	updateCards(cards);
 });
 
+socket.on("turn on play", function() {
+	turnOnPlay();
+});
+
 socket.on("unknown card played", function() {
 	unknownCardPlayed();
 });
@@ -66,9 +70,12 @@ function enterMatch() {
 	labels["rematch"].clickable = false;
 	labels["rematch"].disabled = false;
 	labels["waiting"].visible = false;
-	labels["timer"].text = turnTimer;
-	labels["timer"].visible = true;
-	timerInterval = setInterval(updateTimer, 1000);
+	// labels["timer"].text = turnTimer;
+	// labels["timer"].visible = true;
+	// timerInterval = setInternval(updateTimer, 1000);
+	
+	labels["timer"].visible = false;
+
 	resetDots(labels["waiting"]);
 	labels["searching"].visible = false;
 	resetDots(labels["searching"]);
@@ -78,9 +85,18 @@ function enterMatch() {
 
 function updateCards(cards) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
+	console.log("Update cards ", cards)
 	for (var i = 0; i < cards.length; i++) {
+		console.log("NEW CARD: ", cards[i]);
 		handSlots[i].card = cards[i];
 	}
+}
+
+function turnOnPlay(){
+	labels["timer"].text = turnTimer;
+	labels["timer"].visible = true;
+	timerInterval = setInterval(updateTimer, 1000);
 	canPlayCard = true;
 }
 
@@ -88,6 +104,7 @@ function playCard(index) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canPlayCard) {
 		socket.emit("play card", index);
+		labels["timer"].visible = false;
 		canPlayCard = false;
 	}
 }

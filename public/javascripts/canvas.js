@@ -1,6 +1,8 @@
 // This file manages the game's logic for most visual things and contains various functions
 // for drawing on and manipulating the canvas, used by the game client.
 
+var handSize = 10;
+
 //////////  Constructors  \\\\\\\\\\
 function Label(position, text, size, visible, clickable, disabled, font, callback) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
@@ -23,7 +25,7 @@ function init() {
 	ctx = canvas.getContext("2d");
 	handleResize();
 	handSlots = [];
-	for (var i = 1; i < 6; i++) {
+	for (var i = 0; i < handSize; i++) {
 		handSlots.push({
 			position: {
 				x: canvas.width / 6 * i - cardWidth / 2,
@@ -45,6 +47,29 @@ function init() {
 function animate() {
 	requestAnimFrame(animate);
 	draw();
+}
+
+function toColor(colorStr) {
+	var color = undefined;
+	switch (colorStr) {
+		case "yellow":
+			color = "#fdee00";
+			break;
+		case "green":
+			color = "#52a546";
+			break;
+		case "blue":
+			color = "#246acd";
+			break;
+		case "black":
+			color = "#000000";
+			break;
+		case "red":
+			color = "#e02929"
+			break;
+	}
+
+	return color;
 }
 
 //////////  Events  \\\\\\\\\\
@@ -96,9 +121,8 @@ function handleMouseUp(event) {
 		}
 	}
 
-
 	for (var i = 0; i < handSlots.length; i++) {
-		if (isOnSlot(event, handSlots[i])) {
+		if (isOnSlot(event, handSlots[i]) && canPlayCard) {
 			playCard(i);
 			playerCard = handSlots[i].card;
 			handSlots[i].card = undefined;
@@ -169,6 +193,7 @@ function draw() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	for (var i = 0; i < handSlots.length; i++) {
 		if (displayCardSlots) {
+			console.log("\n\nAbout to call drawCard\n\n");
 			if (handSlots[i].card) {
 				drawCard(handSlots[i].card, handSlots[i].position, 1);
 			} else {
@@ -199,39 +224,47 @@ function drawCard(card, position, scale) {
 	if (!scale) {
 		scale = 1;
 	}
+	console.log("\n\n Drawing : ", card);
+	console.log("\n\n Drawing : ", card.number);
+
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
-	ctx.fillStyle = colors[card.color];
+	// console.log("ctx.fillStyle = toColor(", card.color, ")");
+	ctx.fillStyle = toColor(card.color);
 	ctx.fillRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
 	ctx.strokeStyle = "#000000";
 	ctx.lineWidth = 2 * scale * r;
 	ctx.strokeRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
 	ctx.fillStyle = "#ffffff";
 	ctx.fillRect(position.x + cardWidth * scale * 0.1, position.y + cardHeight * scale * 0.067, cardWidth * scale * 0.8, cardHeight * scale * 0.866);
-	ctx.fillStyle = typeColors[card.type];
-	ctx.font = "bold " + (64 * scale * r) + "px chinese_takeaway";
-	ctx.fillText(card.power, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.4);
+	// console.log("ctx.fillStyle = toColor(", card.color, ")");
+
+	ctx.fillStyle = toColor(card.color);
+	ctx.font = "bold " + (64 * scale * r) + "px 3ds";
+	ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.4);
 	ctx.font = (32 * scale * r) + "px Arial";
-	ctx.fillText(types[card.type], position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);
+	ctx.fillText(card.color, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);
 }
 
 function drawPointCard(card, position, scale) {
 	if (!scale) {
 		scale = 1;
 	}
+	console.log("Drawing point card");
+
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
-	ctx.fillStyle = colors[card.color];
+	ctx.fillStyle = toColor(card.color);
 	ctx.fillRect(position.x, position.y, cardWidth * scale, cardWidth * scale);
 	ctx.strokeStyle = "#000000";
 	ctx.lineWidth = 4 * scale * r;
 	ctx.strokeRect(position.x, position.y, cardWidth * scale, cardWidth * scale);
-	ctx.fillStyle = typeColors[card.type];
+	ctx.fillStyle = toColor(card.color);
 	ctx.font = "bold " + (72 * scale * r) + "px Arial";
-	ctx.fillText(types[card.type][0], position.x + cardWidth * scale / 2, position.y + cardWidth * scale * 0.5);
+	ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardWidth * scale * 0.5);
 	ctx.strokeStyle = "#ffffff";
 	ctx.lineWidth = 3 * r * scale;
-	ctx.strokeText(types[card.type][0], position.x + cardWidth * scale / 2, position.y + cardWidth * scale * 0.5);
+	ctx.strokeText(card.color, position.x + cardWidth * scale / 2, position.y + cardWidth * scale * 0.5);
 }
 
 function drawUnknownCard(position, scale) {
