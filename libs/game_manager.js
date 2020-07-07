@@ -47,6 +47,10 @@ module.exports.listen = function(app) {
 			leaveQueue(socket);
 		});
 
+		socket.on("skip turn", function() {
+			skipTurn(socket);
+		})
+
 		socket.on("play card", function(index) {
 			playCard(socket, index);
 		});
@@ -89,9 +93,11 @@ function playerDisconnected(socket) {
  * @param socketId	The socket id of the player
  */
 function findPlayerById(socketId) {
-	console.log("FINDING PLAYER BY ID");
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	for (var i = 0; i < players.length; i++) {
+		console.log("Plauer id : ", players[i].socket.id);
+		console.log(players[i]);
 		if (players[i].socket.id === socketId) {
 			return players[i];
 		}
@@ -164,7 +170,6 @@ function createMatch(participants) {
 	// Iterate over each participant
 	for (var participant = 0; participant < participants.length; participant++) {
 		// Create a new playerObject
-		console.log("Assiging to team : ", newTeams[Math.floor(participant / teamSize)])
 		var playerObject = {
 			socket: participants[participant].socket,
 			// Add player to next team in order
@@ -175,11 +180,12 @@ function createMatch(participants) {
 			currentCard: undefined
 		};
 
-		console.log("Adding new player to match: ", playerObject);
-
 		newPlayers.push(playerObject);
 		participants[participant].socket.emit("update cards", playerObject.cards);
 	}
+
+	// Overwrite players
+	players = newPlayers;
 
 	var newRound = {
 		number: 0,							// The round number
@@ -205,9 +211,8 @@ function createMatch(participants) {
 		timer: timerDuration
 	};
 
-	console.log("Creating new match: ", match);
-
 	for (var z = 0;  z < participants.length; z++){
+		console.log("CARD : ", match.players[z].cards);
 		participants[z].socket.join(id);
 	}
 
@@ -215,7 +220,7 @@ function createMatch(participants) {
 	io.to(id).emit("enter match");
 	match.timerActive = true;
 
-	participants[0].socket.emit("turn on play");
+	handleTurn(match)
 }
 
 /**
@@ -327,42 +332,54 @@ function findMatchBySocketId(socketId) {
 function playCard(socket, index) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	console.log("\n\nplaying card\n\n");
-
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
-		var player = findPlayerById(match, socket.id);
+
+	for (var z = 0;  z < match.players.length; z++){
+		console.log("PlayerCARD : ", match.players[z].cards);
+	}
+	console.log("SOCKEt id ", socket.id);
+		var player = findPlayerById(socket.id);
 		
 		if (!player.currentCard) {
+			console.log("Player cards: ", player.cards);
 			if (index >= 0 && index < player.cards.length) {
 				if (player.cards[index] !== undefined) {
 					// player.currentCard = player.cards[index];
 					// player.cards[index] = undefined;
 
-					if (player.turn == match.turn) {
+					if (player.turn == match.round.turn) {
 						player.currentCard = player.cards[index];
 						player.cards[index] = undefined;
 
 						match.timerActive = false;
 						match.timer = timerDuration;
 
-						if (fightCards(match, player.currentCard)) {
+						if (match.round.turn === 0 || fightCards(match, player.currentCard)) {
 							match.round.topCard = player.currentCard;
 							match.round.currentLeader = player.team;
 						}
 
 						match.round.cardPile.push(player.currentCard);
 
-						if (player.turn == match.round.turn) {
-							processRound(match);
-						}
-						else {
-							match.round.turn++;
-						}
+						match.round.turn++;
+
+						handleTurn(match);
 					}
 				}
 			}
 		}
+	}
+}
+
+function handleTurn(match) {
+	var turn = match.round.turn;
+	console.log("turn: ", turn);
+	if (turn < match.players.length) {
+		match.players[turn].socket.emit("turn play on");
+	}
+	else {
+		processRound(match);
 	}
 }
 
@@ -486,6 +503,11 @@ function nextRound(match) {
 			}
 		}
 	}
+
+	match.round.number++;
+	match.round.turn = 0;
+
+	handleTurn(match)
 }
 
 function checkForSet(player) {
@@ -575,7 +597,7 @@ function updateCardsRequested(socket) {
 	
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
-		var player = findPlayerById(match, socket.id);
+		var player = findPlayerById( socket.id);
 		player.socket.emit("update cards", player.cards);
 		match.timerActive = true;
 	}

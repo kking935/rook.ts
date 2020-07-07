@@ -193,7 +193,6 @@ function draw() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	for (var i = 0; i < handSlots.length; i++) {
 		if (displayCardSlots) {
-			console.log("\n\nAbout to call drawCard\n\n");
 			if (handSlots[i].card) {
 				drawCard(handSlots[i].card, handSlots[i].position, 1);
 			} else {
@@ -224,8 +223,6 @@ function drawCard(card, position, scale) {
 	if (!scale) {
 		scale = 1;
 	}
-	console.log("\n\n Drawing : ", card);
-	console.log("\n\n Drawing : ", card.number);
 
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
@@ -250,7 +247,6 @@ function drawPointCard(card, position, scale) {
 	if (!scale) {
 		scale = 1;
 	}
-	console.log("Drawing point card");
 
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";

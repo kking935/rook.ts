@@ -20,7 +20,7 @@ socket.on("update cards", function(cards) {
 	updateCards(cards);
 });
 
-socket.on("turn on play", function() {
+socket.on("turn play on", function() {
 	turnOnPlay();
 });
 
@@ -86,9 +86,7 @@ function enterMatch() {
 function updateCards(cards) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	console.log("Update cards ", cards)
 	for (var i = 0; i < cards.length; i++) {
-		console.log("NEW CARD: ", cards[i]);
 		handSlots[i].card = cards[i];
 	}
 }
@@ -100,12 +98,16 @@ function turnOnPlay(){
 	canPlayCard = true;
 }
 
+function turnOffPlay(){;
+	labels["timer"].visible = false;
+	canPlayCard = false;
+}
+
 function playCard(index) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canPlayCard) {
 		socket.emit("play card", index);
-		labels["timer"].visible = false;
-		canPlayCard = false;
+		turnOffPlay();
 	}
 }
 
@@ -226,5 +228,7 @@ function updateTimer() {
 	if (labels["timer"].text === 0) {
 		canPlayCard = false;
 		clearInterval(timerInterval);
+		playCard(0);
+		turnOffPlay();
 	}
 }
