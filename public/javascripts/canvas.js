@@ -2,12 +2,13 @@
 // for drawing on and manipulating the canvas, used by the game client.
 
 var handSize = 10;
+var potSize = 5;
 
 //////////  Constructors  \\\\\\\\\\
 function Label(position, text, size, visible, clickable, disabled, font, callback) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-		//x and y are integers betweem 0 and 1. Use as percentages.
-this.position = position;
+	// x and y are integers betweem 0 and 1. Use as percentages.
+	this.position = position;
 	this.text = text;
 	this.size = size;
 	this.visible = visible;
@@ -41,7 +42,12 @@ function init() {
 	labels["rematch"] = new Label({x: 0.5, y: 0.62}, "Rematch", 128, false, false, false, labelFont, requestRematch);
 	labels["waiting"] = new Label({x: 0.5, y: 0.62}, "Waiting   ", 128, false, false, false, labelFont);
 	labels["main menu"] = new Label({x: 0.5, y: 0.78}, "Main Menu", 128, false, false, false, labelFont, exitMatch);
-	labels["timer"] = new Label({x: 0.5, y: 0.1}, 20, 64, false, false, false, labelFont);
+	labels["timer"] = new Label({x: 0.5, y: 0.1}, 60, 64, false, false, false, labelFont);
+	labels["currentBet"] = new Label({x: 0.5, y: 0.1}, "Current Bet: ", 128, false, false, false, labelFont);
+	labels["bet"] = new Label({x: 0.25, y: 0.3}, "Bet", 98, false, true, false, labelFont, handleBet);
+	labels["pass"] = new Label({x: 0.75, y: 0.3}, "Pass", 98, false, true, false, labelFont, handlePass);
+	labels["betting"] = new Label({x: 0.5, y: 0.4}, "Betting   ", 144, false, false, false, labelFont);
+
 }
 
 function animate() {
@@ -318,6 +324,40 @@ function drawLabel(label) {
 		ctx.fillText(label.text, canvas.width * label.position.x + (shadowDistance * 0.5 * r), canvas.height * label.position.y + (shadowDistance * 0.5 * r));
 	} else {
 		ctx.fillText(label.text, canvas.width * label.position.x, canvas.height * label.position.y);
+	}
+}
+
+function chooseCards(cards) {
+
+	if (!scale) {
+		scale = 1;
+	}
+
+	for (var i = 0; i < potSize; i++) {
+
+		var card = cards[i];
+		var position = {
+				x: canvas.width / 6 * i - cardWidth / 2,
+				y: canvas.height - cardHeight * 0.9
+		}
+		
+		ctx.textBaseline = "middle";
+		ctx.textAlign = "center";
+		// console.log("ctx.fillStyle = toColor(", card.color, ")");
+		ctx.fillStyle = toColor(card.color);
+		ctx.fillRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
+		ctx.strokeStyle = "#000000";
+		ctx.lineWidth = 2 * scale * r;
+		ctx.strokeRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
+		ctx.fillStyle = "#ffffff";
+		ctx.fillRect(position.x + cardWidth * scale * 0.1, position.y + cardHeight * scale * 0.067, cardWidth * scale * 0.8, cardHeight * scale * 0.866);
+		// console.log("ctx.fillStyle = toColor(", card.color, ")");
+	
+		ctx.fillStyle = toColor(card.color);
+		ctx.font = "bold " + (64 * scale * r) + "px 3ds";
+		ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.4);
+		ctx.font = (32 * scale * r) + "px Arial";
+		ctx.fillText(card.color, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);	
 	}
 }
 

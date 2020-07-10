@@ -3,10 +3,12 @@
 
 var socket = io();
 var canPlayCard = false;
+var canBet = false;
 var logFull = false;
 var playerPoints = [],
 	opponentPoints = [];
 var opponentCard, playerCard, matchWinner, matchEndReason, readyToEnd, timerInterval;
+var currentBet = 0;
 
 // Set the countdown timer
 const turnTimer = 60;
@@ -23,6 +25,14 @@ socket.on("update cards", function(cards) {
 socket.on("turn play on", function() {
 	turnOnPlay();
 });
+
+socket.on("turn on bet", function(currentBet) {
+	turnOnBet(currentBet);
+});
+
+socket.on("choose cards and trumps", function(cards) {
+	chooseCards(cards);
+})
 
 socket.on("unknown card played", function() {
 	unknownCardPlayed();
@@ -98,9 +108,42 @@ function turnOnPlay(){
 	canPlayCard = true;
 }
 
+function turnOnBet(currentBet){
+	currentBet = currentBet;
+	labels["currentBet"].visible = true;
+	labels["currentBet"].text = "Current Bet: " + currentBet;
+	labels["bet"].visible = true;
+	labels["pass"].visible = true;
+	canBet = true;
+}
+
+function turnOffBet() {
+	labels["bet"].visible = false;
+	labels["pass"].visible = false;
+	labels["betting"].visible = true;
+	canBet = false;
+}
+
 function turnOffPlay(){;
 	labels["timer"].visible = false;
 	canPlayCard = false;
+}
+
+function handleBet() {
+	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	if (canBet) {
+		labels["currentBet"].text = 'Current Bet: ' + currentBet + 5;
+		socket.emit("bet on", currentBet + 5);
+		turnOffBet();
+	}
+}
+
+function handlePass() {
+	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	if (canBet) {
+		socket.emit("bet off");
+		turnOffBet;
+	}
 }
 
 function playCard(index) {
@@ -205,7 +248,7 @@ function requestRematch() {
 }
 
 function animateLabels() {
-	var dotLabels = [labels["waiting"], labels["searching"]];
+	var dotLabels = [labels["waiting"], labels["searching"], labels["betting"]];
 	for (var i = 0; i < dotLabels.length; i++) {
 		if (dotLabels[i].visible) {
 			updateDots(dotLabels[i]);

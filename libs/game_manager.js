@@ -47,6 +47,10 @@ module.exports.listen = function(app) {
 			leaveQueue(socket);
 		});
 
+		socket.on("bet", function(socket, bet) {
+			handleBet(socket, bet);
+		});
+
 		socket.on("skip turn", function() {
 			skipTurn(socket);
 		})
@@ -155,7 +159,6 @@ function createMatch(participants) {
 	// Create array for players
 	var newPlayers = [];
 
-
 	var newTeams = [];
 	for (var team = 0; 
 		team < Math.floor(participants.length / teamSize); 
@@ -165,7 +168,6 @@ function createMatch(participants) {
 			points: 0
 		})
 	}
-
 
 	// Iterate over each participant
 	for (var participant = 0; participant < participants.length; participant++) {
@@ -189,14 +191,15 @@ function createMatch(participants) {
 
 	var newRound = {
 		number: 0,							// The round number
-		pot: dealHand(newDeck, potSize),		// The pot at the start of each round
+		pot: dealHand(newDeck, potSize),	// The pot at the start of each round
 		cardPile: [],						// The current pile of cards
 		topCard: undefined,					// The current greatest card value
 		turn: 0,							// Which player's turn it is
-		currentLeader: undefined,			// Current winning team
+		currentLeader: undefined,			// Player with the best card in this round's pile
 		trumps: undefined,					// The card color for trumps
-		bet: undefined,								// The bet for this round
-		better: undefined					// The team that bet on this round
+		bet: 0,								// The bet for this round
+		better: undefined,					// The team that bet on this round
+		betters: []
 	}
 
 	// Make new match
@@ -213,6 +216,7 @@ function createMatch(participants) {
 
 	for (var z = 0;  z < participants.length; z++){
 		console.log("CARD : ", match.players[z].cards);
+		match.round.betters.push(players[z]);
 		participants[z].socket.join(id);
 	}
 
@@ -220,7 +224,7 @@ function createMatch(participants) {
 	io.to(id).emit("enter match");
 	match.timerActive = true;
 
-	handleTurn(match)
+	callBet(match)
 }
 
 /**
@@ -319,10 +323,44 @@ function findMatchBySocketId(socketId) {
 	}
 	return false;
 }
+ 
+/**
+ * Tells the next player in the match to bet,
+ * or starts the round if the 
+ * @param match 
+ */
+function callBet(match) {
+	var turn = match.round.turn;
+	console.log("turn: ", turn);
+	if (turn < match.round.betters.length) {
+		match.round.betters[turn].socket.emit("turn on bet", match.round.bet);
+	}
+	else if (match.round.betters.length > 1) {
+		match.round.turn = 0;
+		callBet(match);
+	}
+	else {
+		startRound(match);
+	}
+}
 
-//////////////////////////// PLAY FUNCTIONS /////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
+function handleBet(socketId, bet) {
+	var match = findMatchBySocketId(socketId);
+	var player = findPlayerById(socketId);
+	if (bet > match.round.bet) {
+		match.round.bet = bet;
+		match.round.better = player;
+	}
+	else {
+		match.round.betters.splice(match.round.betters.indexOf(player), 1);
+	}
+	match.round.turn++;
+	callBet(match);
+}
 
+function startRound(match) {
+	match.round.better.emit('choose cards and trumps', match.round.pot);
+}
 
 /**
  * Handles when a player wants to play their currently selected card
@@ -471,7 +509,7 @@ function processRound(match) {
 		}
 	}
 
-	if (match.round.better === match.round.currentLeader
+	if (match.round.better.team === match.round.currentLeader.team
 		&& match.round.bet <= totalPoints) {
 		match.round.better.points += totalPoints;
 	}
