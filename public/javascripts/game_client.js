@@ -7,11 +7,12 @@ var canBet = false;
 var logFull = false;
 var playerPoints = [],
 	opponentPoints = [];
-var opponentCard, playerCard, matchWinner, matchEndReason, readyToEnd, timerInterval;
+var opponentCard, playerCard, matchWinner, matchEndReason, readyToEnd; // timerInterval;
 var currentBet = 0;
+var betIncrements = 5;
 
 // Set the countdown timer
-const turnTimer = 60;
+// const turnTimer = 60;
 
 //////////  Socket Events  \\\\\\\\\\
 socket.on("enter match", function(team) {
@@ -30,8 +31,24 @@ socket.on("turn on bet", function(currentBet) {
 	turnOnBet(currentBet);
 });
 
-socket.on("choose cards and trumps", function(cards) {
+socket.on("turn off bet", function() {
+	console.log('in turn off bet emitter');
+	labels["currentBet"].visible = false;
+	labels["betting"].visible = false;
+	turnOffBet();
+});
+
+socket.on("update current bet", function(newBet) {
+	currentBet = newBet;
+	labels["currentBet"].text = currentBet;
+})
+
+socket.on("choose cards", function(cards) {
 	chooseCards(cards);
+})
+
+socket.on("choose trumps", function() {
+	chooseTrumps();
 })
 
 socket.on("unknown card played", function() {
@@ -84,8 +101,12 @@ function enterMatch(team) {
 	// labels["timer"].text = turnTimer;
 	// labels["timer"].visible = true;
 	// timerInterval = setInternval(updateTimer, 1000);
-	
-	labels["timer"].visible = false;
+	// labels["timer"].visible = false;
+
+
+	labels["currentBet"].visible = true;
+	labels["betting"].visible = true;
+
 
 	resetDots(labels["waiting"]);
 	labels["searching"].visible = false;
@@ -103,14 +124,16 @@ function updateCards(cards) {
 }
 
 function turnOnPlay(){
-	labels["timer"].text = turnTimer;
-	labels["timer"].visible = true;
-	timerInterval = setInterval(updateTimer, 1000);
+	// labels["timer"].text = turnTimer;
+	// labels["timer"].visible = true;
+	// timerInterval = setInterval(updateTimer, 1000);
 	canPlayCard = true;
 }
 
-function turnOnBet(currentBet){
-	currentBet = currentBet;
+function turnOnBet(newCurrentBet){
+	labels["betting"].visible = false;
+
+	currentBet = newCurrentBet;
 	labels["currentBet"].visible = true;
 	labels["currentBet"].text = "Current Bet: " + currentBet;
 	labels["bet"].visible = true;
@@ -119,14 +142,13 @@ function turnOnBet(currentBet){
 }
 
 function turnOffBet() {
-	labels["bet"].visible = false;
 	labels["pass"].visible = false;
-	labels["betting"].visible = true;
+	labels["bet"].visible = false;
 	canBet = false;
 }
 
-function turnOffPlay(){;
-	labels["timer"].visible = false;
+function turnOffPlay(){
+	// labels["timer"].visible = false;
 	canPlayCard = false;
 }
 
@@ -134,17 +156,22 @@ function handleBet() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canBet) {
 		console.log('betting');
-		labels["currentBet"].text = 'Current Bet: ' + currentBet + 5;
-		socket.emit("bet", currentBet + 5);
+		var newBet = currentBet + betIncrements;
+		labels["currentBet"].text = 'Current Bet: ' + newBet;
+		console.log(' new bet ' , newBet);
+		socket.emit("bet", newBet);
+		labels["betting"].visible = true;
 		turnOffBet();
 	}
 }
 
 function handlePass() {
+	console.log('passing');
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canBet) {
 		socket.emit("pass");
-		turnOffBet;
+		labels["betting"].visible = true;
+		turnOffBet();
 	}
 }
 
@@ -175,7 +202,7 @@ function displayResult(result) {
 	playerPoints = player.points;
 	opponentPoints = opponent.points;
 	opponentCard = opponent.card;
-	clearInterval(timerInterval);
+	// clearInterval(timerInterval);
 	setTimeout(function() {
 		if (readyToEnd) {
 			endMatch();
@@ -183,8 +210,8 @@ function displayResult(result) {
 			canPlayCard = true;
 			opponentCard = undefined;
 			playerCard = undefined;
-			labels["timer"].text = turnTimer;
-			timerInterval = setInterval(updateTimer, 1000);
+			// labels["timer"].text = turnTimer;
+			// timerInterval = setInterval(updateTimer, 1000);
 			canPlayCard = true;
 			socket.emit("request cards update");
 		}
@@ -216,9 +243,9 @@ function endMatch() {
 	labels["rematch"].visible = true;
 	labels["main menu"].visible = true;
 	labels["main menu"].clickable = true;
-	labels["timer"].visible = false;
-	labels["timer"].text = turnTimer;
-	clearInterval(timerInterval);
+	// labels["timer"].visible = false;
+	// labels["timer"].text = turnTimer;
+	// clearInterval(timerInterval);
 	matchWinner = undefined;
 	matchEndReason = undefined;
 }
@@ -268,12 +295,12 @@ function resetDots(label) {
 	label.text = label.text.slice(0, -3) + "...";
 }
 
-function updateTimer() {
-	labels["timer"].text -= 1;
-	if (labels["timer"].text === 0) {
-		canPlayCard = false;
-		clearInterval(timerInterval);
-		playCard(0);
-		turnOffPlay();
-	}
-}
+// function updateTimer() {
+// 	labels["timer"].text -= 1;
+// 	if (labels["timer"].text === 0) {
+// 		canPlayCard = false;
+// 		clearInterval(timerInterval);
+// 		playCard(0);
+// 		turnOffPlay();
+// 	}
+// }

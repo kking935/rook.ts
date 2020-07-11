@@ -24,7 +24,7 @@ const handSize = 10;
 const potSize = 5;
 
 var logFull = false;
-const timerDuration = 60;
+// const timerDuration = 60;
 
 // updateTimers();
 
@@ -49,11 +49,13 @@ module.exports.listen = function(app) {
 		});
 
 		socket.on("bet", function(bet) {
+			console.log('bet recieved');
+			io.to(findMatchBySocketId(socket.id).id).emit('update current bet', bet);
 			handleBet(socket, bet);
 		});
 
-		socket.on("skip turn", function() {
-			skipTurn(socket);
+		socket.on("pass", function() {
+			handlePass(socket);
 		})
 
 		socket.on("play card", function(index) {
@@ -83,7 +85,7 @@ module.exports.listen = function(app) {
  */
 function playerDisconnected(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	console.log('player outtt');
+	console.log('Player Disconnected: ', socket.id);
 	var player = findPlayerById(socket.id);
 	var index = players.indexOf(player);
 	if (index > -1) {
@@ -154,7 +156,6 @@ function createMatch(participants) {
 
 	// Create unique id for match
 	var id = createId();
-	console.log("Match id: ", id);
 
 	// Create a deck before assigning hands to players
 	var newDeck = shuffleDeck(generateDeck());
@@ -172,11 +173,9 @@ function createMatch(participants) {
 		})
 	}
 
-	console.log('participant lanegt', participants.length);
 	// Iterate over each participant
 	for (var participant = 0; participant < participants.length; participant++) {
 		// Create a new playerObject
-		console.log('im here', participant)
 		var playerObject = {
 			socket: participants[participant].socket,
 			// Add player to next team in order
@@ -202,20 +201,19 @@ function createMatch(participants) {
 		players: newPlayers,
 		teams: newTeams,
 		isOver: false,
-		timerActive: false,
-		timer: timerDuration
+		// timerActive: false,
+		// timer: timerDuration
 	};
 
 	for (var z = 0;  z < participants.length; z++){
-		console.log("CARD : ", match.players[z].cards);
 		participants[z].socket.join(id);
 	}
 
 	matches.push(match);
 	io.to(id).emit("enter match");
-	match.timerActive = true;
+	// match.timerActive = true;
 
-	callBet(match)
+	callBet(match);
 }
 
 function createRound(roundNumber, deck) {
@@ -347,14 +345,19 @@ function findMatchBySocketId(socketId) {
 function callBet(match) {
 	var turn = match.round.turnToBet;
 	console.log("turn to bet: ", turn);
-	if (turn < match.round.currentBetters.length) {
+	if (turn < match.round.currentBetters.length && match.round.currentBetters.length != 1) {
+		console.log('calling currentBetters[turn] where turn = ', turn);
 		match.round.currentBetters[turn].socket.emit("turn on bet", match.round.bet);
 	}
 	else if (match.round.currentBetters.length > 1) {
+		console.log('about to loop betting');
 		match.round.turnToBet = 0;
 		callBet(match);
 	}
 	else {
+		match.round.roundBetter = match.round.currentBetters[0];
+		console.log('the winner of the best is ', match.round.currentBetters[0].turn);
+		io.to(match.matchId).emit("turn off bet");
 		startRound(match);
 	}
 }
@@ -368,14 +371,27 @@ function handleBet(socket, bet) {
 		match.round.roundBetter = player;
 	}
 	else {
-		match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);
+		handlePass(socket);
 	}
 	match.round.turnToBet++;
 	callBet(match);
 }
 
+function handlePass(socket) {
+	console.log('socket passes');
+	var match = findMatchBySocketId(socket.id);
+	var player = findPlayerById(socket.id);
+
+	match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);
+	
+	// keep turns the same
+	// match.round.turnToBet = match.round.turnToBet
+	callBet(match);
+}
+
 function startRound(match) {
-	match.round.roundBetter.emit('choose cards and trumps', match.round.pot);
+	
+	match.round.roundBetter.socket.emit('choose cards', match.round.pot);
 }
 
 /**
@@ -406,8 +422,8 @@ function playCard(socket, index) {
 						player.currentCard = player.cards[index];
 						player.cards[index] = undefined;
 
-						match.timerActive = false;
-						match.timer = timerDuration;
+						// match.timerActive = false;
+						// match.timer = timerDuration;
 
 						if (match.round.circuit.turnToPlay === 0 || fightCards(match, player.currentCard)) {
 							match.round.circuit.bestCard = player.currentCard;
@@ -621,7 +637,7 @@ function leaveMatch(socket) {
 function endMatch(match, reason) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	var winningTeam = teams[0];
+	var winningTeam = undefined;
 	for (var team in teams){
 		if (team.points > winningTeam.points){
 			winningTeam = team;
@@ -630,10 +646,9 @@ function endMatch(match, reason) {
 
 	io.to(match.matchId).emit("end match", winningTeam, reason);
 	
-	
 	match.isOver = true;
-	match.timer = timerDuration;
-	match.timerActive = false;
+	// match.timer = timerDuration;
+	// match.timerActive = false;
 }
 
 /**
@@ -659,7 +674,7 @@ function updateCardsRequested(socket) {
 	if (match) {
 		var player = findPlayerById( socket.id);
 		player.socket.emit("update cards", player.cards);
-		match.timerActive = true;
+		// match.timerActive = true;
 	}
 }
 

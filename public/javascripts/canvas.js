@@ -43,7 +43,7 @@ function init() {
 	labels["rematch"] = new Label({x: 0.5, y: 0.62}, "Rematch", 128, false, false, false, labelFont, requestRematch);
 	labels["waiting"] = new Label({x: 0.5, y: 0.62}, "Waiting   ", 128, false, false, false, labelFont);
 	labels["main menu"] = new Label({x: 0.5, y: 0.78}, "Main Menu", 128, false, false, false, labelFont, exitMatch);
-	labels["timer"] = new Label({x: 0.5, y: 0.1}, 60, 64, false, false, false, labelFont);
+	// labels["timer"] = new Label({x: 0.5, y: 0.1}, 60, 64, false, false, false, labelFont);
 	labels["currentBet"] = new Label({x: 0.5, y: 0.1}, "Current Bet: ", 128, false, false, false, labelFont);
 	labels["bet"] = new Label({x: 0.25, y: 0.3}, "Bet", 98, false, true, false, labelFont, handleBet);
 	labels["pass"] = new Label({x: 0.75, y: 0.3}, "Pass", 98, false, true, false, labelFont, handlePass);
@@ -329,13 +329,10 @@ function drawLabel(label) {
 }
 
 function chooseCards(cards) {
+console.log('here');
 
-	if (!scale) {
-		scale = 1;
-	}
-
-	for (var i = 0; i < potSize; i++) {
-
+	for (var i = 0; i < cards.length; i++) {
+console.log('trying to draw');
 		var card = cards[i];
 		var position = {
 				x: canvas.width / 6 * i - cardWidth / 2,
@@ -362,6 +359,9 @@ function chooseCards(cards) {
 	}
 }
 
+function chooseTrumps() {
+	// TODO: Implement this
+}
 //////////  Initialize  \\\\\\\\\\
 window.requestAnimFrame = (function () {
 	return window.requestAnimationFrame ||
