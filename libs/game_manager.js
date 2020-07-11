@@ -18,7 +18,8 @@ const rook = {
 }
 
 // Declare team size
-const teamSize = 2;
+const teamSize = 1;
+const numTeams = 2;
 const handSize = 10;
 const potSize = 5;
 
@@ -100,8 +101,6 @@ function findPlayerById(socketId) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	for (var i = 0; i < players.length; i++) {
-		console.log("Plauer id : ", players[i].socket.id);
-		console.log(players[i]);
 		if (players[i].socket.id === socketId) {
 			return players[i];
 		}
@@ -115,15 +114,18 @@ function findPlayerById(socketId) {
  */
 function enterQueue(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	console.log("FIND PLAYER BY ID");
+
 	var player = findPlayerById(socket.id);
 	if (queue.indexOf(player) === -1) {
-		console.log("FOUND PLAYER BY ID");
 		queue.push(player);
 		socket.emit("queue entered");
-		console.log(queue.length);
-		if (queue.length >= 4) {
-			createMatch([queue.shift(), queue.shift(), queue.shift(), queue.shift()]);
+		if (queue.length >= numTeams * teamSize) {
+			var newPlayers = [];
+			var currentQueue = queue.length;
+			for (var x = 0; x < currentQueue ; x++) {
+				newPlayers.push(queue.shift())
+			}
+			createMatch(newPlayers);
 		}
 	}
 }
@@ -134,6 +136,7 @@ function enterQueue(socket) {
  */
 function leaveQueue(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	var player = findPlayerById(socket.id);
 	var index = queue.indexOf(player);
 	if (index > -1) {
@@ -169,9 +172,11 @@ function createMatch(participants) {
 		})
 	}
 
+	console.log('participant lanegt', participants.length);
 	// Iterate over each participant
 	for (var participant = 0; participant < participants.length; participant++) {
 		// Create a new playerObject
+		console.log('im here', participant)
 		var playerObject = {
 			socket: participants[participant].socket,
 			// Add player to next team in order
@@ -189,24 +194,11 @@ function createMatch(participants) {
 	// Overwrite players
 	players = newPlayers;
 
-	var newRound = {
-		number: 0,							// The round number
-		pot: dealHand(newDeck, potSize),	// The pot at the start of each round
-		cardPile: [],						// The current pile of cards
-		topCard: undefined,					// The current greatest card value
-		turn: 0,							// Which player's turn it is
-		currentLeader: undefined,			// Player with the best card in this round's pile
-		trumps: undefined,					// The card color for trumps
-		bet: 0,								// The bet for this round
-		better: undefined,					// The team that bet on this round
-		betters: []
-	}
-
 	// Make new match
 	var match = {
 		matchId: id,
 		deck: newDeck,
-		round: newRound,
+		round: createRound(0, newDeck),
 		players: newPlayers,
 		teams: newTeams,
 		isOver: false,
@@ -216,7 +208,6 @@ function createMatch(participants) {
 
 	for (var z = 0;  z < participants.length; z++){
 		console.log("CARD : ", match.players[z].cards);
-		match.round.betters.push(players[z]);
 		participants[z].socket.join(id);
 	}
 
@@ -225,6 +216,30 @@ function createMatch(participants) {
 	match.timerActive = true;
 
 	callBet(match)
+}
+
+function createRound(roundNumber, deck) {
+	var newRound = {
+		number: roundNumber,				// The round number
+		pot: dealHand(deck, potSize),		// The pot at the start of each round
+		turnToBet: 0,						// The turn for the bet
+		bet: 0,								// The bet for this round
+		roundBetter: undefined,				// The team that bet on this round
+		currentBetters: players,			// Initialize the round's betters to be all the players
+		trumps: undefined,					// The card color for trumps
+		ciruit: createCircuit()				// The circuit of plays
+	}
+	return newRound;
+}
+
+function createCircuit() {
+	var newCircuit = {
+		cardPile: [],						// The current pile of cards
+		bestCard: undefined,				// The current greatest card value
+		currentLeader: undefined,			// Player with the best card in this round's pile
+		turnToPlay: 0,						// Which player's turn it is
+	}
+	return newCircuit;
 }
 
 /**
@@ -330,13 +345,13 @@ function findMatchBySocketId(socketId) {
  * @param match 
  */
 function callBet(match) {
-	var turn = match.round.turn;
-	console.log("turn: ", turn);
-	if (turn < match.round.betters.length) {
-		match.round.betters[turn].socket.emit("turn on bet", match.round.bet);
+	var turn = match.round.turnToBet;
+	console.log("turn to bet: ", turn);
+	if (turn < match.round.currentBetters.length) {
+		match.round.currentBetters[turn].socket.emit("turn on bet", match.round.bet);
 	}
-	else if (match.round.betters.length > 1) {
-		match.round.turn = 0;
+	else if (match.round.currentBetters.length > 1) {
+		match.round.turnToBet = 0;
 		callBet(match);
 	}
 	else {
@@ -349,17 +364,17 @@ function handleBet(socketId, bet) {
 	var player = findPlayerById(socketId);
 	if (bet > match.round.bet) {
 		match.round.bet = bet;
-		match.round.better = player;
+		match.round.roundBetter = player;
 	}
 	else {
-		match.round.betters.splice(match.round.betters.indexOf(player), 1);
+		match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);
 	}
-	match.round.turn++;
+	match.round.turnToBet++;
 	callBet(match);
 }
 
 function startRound(match) {
-	match.round.better.emit('choose cards and trumps', match.round.pot);
+	match.round.roundBetter.emit('choose cards and trumps', match.round.pot);
 }
 
 /**
@@ -386,21 +401,21 @@ function playCard(socket, index) {
 					// player.currentCard = player.cards[index];
 					// player.cards[index] = undefined;
 
-					if (player.turn == match.round.turn) {
+					if (player.turn == match.round.ciruit.turnToPlay) {
 						player.currentCard = player.cards[index];
 						player.cards[index] = undefined;
 
 						match.timerActive = false;
 						match.timer = timerDuration;
 
-						if (match.round.turn === 0 || fightCards(match, player.currentCard)) {
-							match.round.topCard = player.currentCard;
-							match.round.currentLeader = player.team;
+						if (match.round.circuit.turnToPlay === 0 || fightCards(match, player.currentCard)) {
+							match.round.circuit.bestCard = player.currentCard;
+							match.round.circuit.currentLeader = player.team;
 						}
 
-						match.round.cardPile.push(player.currentCard);
+						match.round.circuit.cardPile.push(player.currentCard);
 
-						match.round.turn++;
+						match.round.circuit.turn++;
 
 						handleTurn(match);
 					}
@@ -509,18 +524,18 @@ function processRound(match) {
 		}
 	}
 
-	if (match.round.better.team === match.round.currentLeader.team
+	if (match.round.roundBetter.team === match.round.ciruit.currentLeader.team
 		&& match.round.bet <= totalPoints) {
-		match.round.better.points += totalPoints;
+		match.round.roundBetter.team.points += totalPoints;
 	}
 	else {
-		match.round.better.points -= totalPoints;
+		match.round.roundBetter.team.points -= totalPoints;
 	}
 
 	// TODO: Update figh result socket now
-	io.to(match.matchId).emit("fight result", match.round.currentLeader);
+	io.to(match.matchId).emit("fight result", match.round.circuit.currentLeader);
 
-	if (match.round.currentLeader.points >= goalPoints) {
+	if (match.round.roundBetter.team.points >= goalPoints) {
 		endMatch(match, winner, "set");
 	} else {
 		nextRound(match);
@@ -543,7 +558,7 @@ function nextRound(match) {
 	}
 
 	match.round.number++;
-	match.round.turn = 0;
+	match.round.turnToBet = 0;
 
 	handleTurn(match)
 }
@@ -588,8 +603,7 @@ function leaveMatch(socket) {
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
 		if (!match.isOver) {
-			var winner = match.players[match.players[0].socket.id !== socket.id ? 0 : 1];
-			endMatch(match, winner, "player left");
+			endMatch(match, "player left");
 		} else {
 			io.to(match.matchId).emit("no rematch");
 		}
@@ -603,12 +617,13 @@ function leaveMatch(socket) {
  * @param {*} winner 	The winners of the match (an array of players)
  * @param {*} reason 	The reason they won
  */
-function endMatch(match, winners, reason) {
+function endMatch(match, reason) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	for (var winner = 0; winner < winners.length; winner++) {
-		io.to(match.matchId).emit("end match", winners[winner].socket.id, reason);
+	for (var x = 0; x < players.length; x++) {
+		io.to(match.matchId).emit("end match", players[x].socket.id, reason);
 	}
+	
 	match.isOver = true;
 	match.timer = timerDuration;
 	match.timerActive = false;
@@ -673,6 +688,7 @@ function updateTimers() {
 		if (matches[i].timerActive) {
 			matches[i].timer -= 1;
 			if (matches[i].timer === 0) {
+				console.log('times up');
 				timesup(matches[i]);
 			}
 		}
