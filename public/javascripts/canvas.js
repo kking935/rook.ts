@@ -44,11 +44,10 @@ function init() {
 	labels["waiting"] = new Label({x: 0.5, y: 0.62}, "Waiting   ", 128, false, false, false, labelFont);
 	labels["main menu"] = new Label({x: 0.5, y: 0.78}, "Main Menu", 128, false, false, false, labelFont, exitMatch);
 	// labels["timer"] = new Label({x: 0.5, y: 0.1}, 60, 64, false, false, false, labelFont);
-	labels["currentBet"] = new Label({x: 0.5, y: 0.1}, "Current Bet: ", 128, false, false, false, labelFont);
+	labels["currentBet"] = new Label({x: 0.5, y: 0.1}, "Current Bet: 0", 128, false, false, false, labelFont);
 	labels["bet"] = new Label({x: 0.25, y: 0.3}, "Bet", 98, false, true, false, labelFont, handleBet);
 	labels["pass"] = new Label({x: 0.75, y: 0.3}, "Pass", 98, false, true, false, labelFont, handlePass);
 	labels["betting"] = new Label({x: 0.5, y: 0.4}, "Betting   ", 144, false, false, false, labelFont);
-
 }
 
 function animate() {

@@ -18,7 +18,7 @@ const rook = {
 }
 
 // Declare team size
-const teamSize = 1;
+const teamSize = 2;
 const numTeams = 2;
 const handSize = 10;
 const potSize = 5;
@@ -50,7 +50,7 @@ module.exports.listen = function(app) {
 
 		socket.on("bet", function(bet) {
 			console.log('bet recieved');
-			io.to(findMatchBySocketId(socket.id).id).emit('update current bet', bet);
+			io.to(findMatchBySocketId(socket.id).matchId).emit('update current bet', bet);
 			handleBet(socket, bet);
 		});
 
@@ -347,7 +347,7 @@ function callBet(match) {
 	console.log("turn to bet: ", turn);
 	if (turn < match.round.currentBetters.length && match.round.currentBetters.length != 1) {
 		console.log('calling currentBetters[turn] where turn = ', turn);
-		match.round.currentBetters[turn].socket.emit("turn on bet", match.round.bet);
+		match.round.currentBetters[turn].socket.emit("turn on bet");
 	}
 	else if (match.round.currentBetters.length > 1) {
 		console.log('about to loop betting');

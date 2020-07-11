@@ -27,8 +27,8 @@ socket.on("turn play on", function() {
 	turnOnPlay();
 });
 
-socket.on("turn on bet", function(currentBet) {
-	turnOnBet(currentBet);
+socket.on("turn on bet", function() {
+	turnOnBet();
 });
 
 socket.on("turn off bet", function() {
@@ -40,7 +40,7 @@ socket.on("turn off bet", function() {
 
 socket.on("update current bet", function(newBet) {
 	currentBet = newBet;
-	labels["currentBet"].text = currentBet;
+	labels["currentBet"].text = "Current Bet: " + currentBet;
 })
 
 socket.on("choose cards", function(cards) {
@@ -130,12 +130,10 @@ function turnOnPlay(){
 	canPlayCard = true;
 }
 
-function turnOnBet(newCurrentBet){
+function turnOnBet(){
 	labels["betting"].visible = false;
 
-	currentBet = newCurrentBet;
 	labels["currentBet"].visible = true;
-	labels["currentBet"].text = "Current Bet: " + currentBet;
 	labels["bet"].visible = true;
 	labels["pass"].visible = true;
 	canBet = true;
