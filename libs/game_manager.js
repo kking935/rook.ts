@@ -26,7 +26,7 @@ const potSize = 5;
 var logFull = false;
 const timerDuration = 60;
 
-updateTimers();
+// updateTimers();
 
 //////////  Socket.io  \\\\\\\\\\
 module.exports.listen = function(app) {
@@ -48,7 +48,7 @@ module.exports.listen = function(app) {
 			leaveQueue(socket);
 		});
 
-		socket.on("bet", function(socket, bet) {
+		socket.on("bet", function(bet) {
 			handleBet(socket, bet);
 		});
 
@@ -83,7 +83,7 @@ module.exports.listen = function(app) {
  */
 function playerDisconnected(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
+	console.log('player outtt');
 	var player = findPlayerById(socket.id);
 	var index = players.indexOf(player);
 	if (index > -1) {
@@ -359,9 +359,10 @@ function callBet(match) {
 	}
 }
 
-function handleBet(socketId, bet) {
-	var match = findMatchBySocketId(socketId);
-	var player = findPlayerById(socketId);
+function handleBet(socket, bet) {
+	console.log('socket bets', bet);
+	var match = findMatchBySocketId(socket.id);
+	var player = findPlayerById(socket.id);
 	if (bet > match.round.bet) {
 		match.round.bet = bet;
 		match.round.roundBetter = player;
@@ -620,9 +621,15 @@ function leaveMatch(socket) {
 function endMatch(match, reason) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	for (var x = 0; x < players.length; x++) {
-		io.to(match.matchId).emit("end match", players[x].socket.id, reason);
+	var winningTeam = teams[0];
+	for (var team in teams){
+		if (team.points > winningTeam.points){
+			winningTeam = team;
+		}
 	}
+
+	io.to(match.matchId).emit("end match", winningTeam, reason);
+	
 	
 	match.isOver = true;
 	match.timer = timerDuration;
@@ -678,44 +685,44 @@ function rematchRequested(socket) {
 	}
 } 
 
-/**
- * Updates the timers for each active match
- */
-function updateTimers() {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+// /**
+//  * Updates the timers for each active match
+//  */
+// function updateTimers() {
+// 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	for (var i = 0; i < matches.length; i++) {
-		if (matches[i].timerActive) {
-			matches[i].timer -= 1;
-			if (matches[i].timer === 0) {
-				console.log('times up');
-				timesup(matches[i]);
-			}
-		}
-	}
-	setTimeout(updateTimers, 1000);
-}
+// 	for (var i = 0; i < matches.length; i++) {
+// 		if (matches[i].timerActive) {
+// 			matches[i].timer -= 1;
+// 			if (matches[i].timer === 0) {
+// 				console.log('times up');
+// 				timesup(matches[i]);
+// 			}
+// 		}
+// 	}
+// 	setTimeout(updateTimers, 1000);
+// }
 
-/**
- * Handles what to do when a match's time is up
- * @param match 	The match that's time is up
- */
-function timesup(match) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+// /**
+//  * Handles what to do when a match's time is up
+//  * @param match 	The match that's time is up
+//  */
+// function timesup(match) {
+// 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	match.timerActive = false;
-	match.timer = timerDuration;
-	if (match.players[0].currentCard) {
-		if (match.players[1].currentCard) {
-			fightCards(match);
-		} else {
-			processRound(match, false, match.players[0]);
-		}
-	} else {
-		if (match.players[1].currentCard) {
-			processRound(match, false, match.players[1]);
-		} else {
-			processRound(match, true, match.players[0]);
-		}
-	}
-}
+// 	match.timerActive = false;
+// 	match.timer = timerDuration;
+// 	if (match.players[0].currentCard) {
+// 		if (match.players[1].currentCard) {
+// 			fightCards(match);
+// 		} else {
+// 			processRound(match, false, match.players[0]);
+// 		}
+// 	} else {
+// 		if (match.players[1].currentCard) {
+// 			processRound(match, false, match.players[1]);
+// 		} else {
+// 			processRound(match, true, match.players[0]);
+// 		}
+// 	}
+// }
