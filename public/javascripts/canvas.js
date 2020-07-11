@@ -26,6 +26,7 @@ function init() {
 	ctx = canvas.getContext("2d");
 	handleResize();
 	handSlots = [];
+	team = undefined;
 	for (var i = 0; i < handSize; i++) {
 		handSlots.push({
 			position: {

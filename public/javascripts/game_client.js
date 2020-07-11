@@ -14,8 +14,8 @@ var currentBet = 0;
 const turnTimer = 60;
 
 //////////  Socket Events  \\\\\\\\\\
-socket.on("enter match", function() {
-	enterMatch();
+socket.on("enter match", function(team) {
+	enterMatch(team);
 });
 
 socket.on("update cards", function(cards) {
@@ -69,8 +69,9 @@ function enterQueue() {
 	labels["searching"].visible = true;
 }
 
-function enterMatch() {
+function enterMatch(team) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	team = team;
 	playerPoints = [];
 	opponentPoints = [];
 	labels["result"].visible = false;
@@ -132,8 +133,9 @@ function turnOffPlay(){;
 function handleBet() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canBet) {
+		console.log('betting');
 		labels["currentBet"].text = 'Current Bet: ' + currentBet + 5;
-		socket.emit("bet on", currentBet + 5);
+		socket.emit("bet", currentBet + 5);
 		turnOffBet();
 	}
 }
@@ -141,7 +143,7 @@ function handleBet() {
 function handlePass() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canBet) {
-		socket.emit("bet off");
+		socket.emit("skip turn", socket);
 		turnOffBet;
 	}
 }
