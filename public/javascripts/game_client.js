@@ -143,7 +143,7 @@ function handleBet() {
 function handlePass() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canBet) {
-		socket.emit("skip turn", socket);
+		socket.emit("pass");
 		turnOffBet;
 	}
 }
