@@ -556,7 +556,7 @@ function processRound(match) {
 	io.to(match.matchId).emit("fight result", match.round.circuit.currentLeader);
 
 	if (match.round.roundBetter.team.points >= goalPoints) {
-		endMatch(match, winner, "set");
+		endMatch(match, match.round.roundBetter.team, "set");
 	} else {
 		nextRound(match);
 	}
@@ -621,15 +621,24 @@ function leaveMatch(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	var match = findMatchBySocketId(socket.id);
-	var player = findPlayerById(socket.id);
 	if (match) {
 		if (!match.isOver) {
-			endMatch(match, player, "player left");
+			quitMatch(match);
 		} else {
 			io.to(match.matchId).emit("no rematch");
 		}
 		removeMatch(match);
 	}
+}
+
+function quitMatch(match) {
+	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
+	io.to(match.matchId).emit("quit match", "player left");
+	
+	match.isOver = true;
+	// match.timer = timerDuration;
+	// match.timerActive = false;
 }
 
 /**
@@ -638,18 +647,8 @@ function leaveMatch(socket) {
  * @param {*} winner 	The winners of the match (an array of players)
  * @param {*} reason 	The reason they won
  */
-function endMatch(match, player, reason) {
+function endMatch(match, winningTeam, reason) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-	var winningTeam = match.teams[0];
-	if (player.team.id === winningTeam.id) {
-		winningTeam = match.teams[1];
-	}
-	for (var x = 0; x < match.teams.length; x++){
-		if (match.teams[x].points > winningTeam.points){
-			winningTeam = match.teams[x];
-		}
-	}
 
 	io.to(match.matchId).emit("end match", winningTeam, reason);
 	

@@ -59,6 +59,14 @@ socket.on("fight result", function(result) {
 	displayResult(result);
 });
 
+socket.on("quit match", function(reason) {
+	console.log('end of match');
+	matchEndReason = reason;
+	readyToEnd = true;
+	quitMatch();	
+});
+
+
 socket.on("end match", function(winners, reason) {
 	console.log('end of match');
 	winningTeam = winners;
@@ -214,6 +222,38 @@ function displayResult(result) {
 			socket.emit("request cards update");
 		}
 	}, (2 * 1000));
+}
+
+function quitMatch() {
+	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
+	canPlayCard = false;
+	readyToEnd = false;
+	opponentCard = undefined;
+	playerCard = undefined;
+	displayCardSlots = false;
+	labels["betting"].visible = false;
+	labels["currentBet"].visible = false;
+	turnOffBet();
+
+	for (var i = 0; i < handSlots.length; i++) {
+		handSlots[i].card = undefined;
+	}
+
+	labels["rematch"].disabled = true;
+	labels["rematch"].clickable = false;
+
+	labels["result"].text = "A Player Disconnected";
+	labels["result"].size = 100;
+	labels["result"].visible = true;
+	labels["rematch"].visible = true;
+	labels["main menu"].visible = true;
+	labels["main menu"].clickable = true;
+	// labels["timer"].visible = false;
+	// labels["timer"].text = turnTimer;
+	// clearInterval(timerInterval);
+	winningTeam = undefined;
+	matchEndReason = undefined;
 }
 
 function endMatch() {
