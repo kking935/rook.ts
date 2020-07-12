@@ -70,7 +70,7 @@ function toColor(colorStr) {
 		case "black":
 			color = "#000000";
 			break;
-		case "red":
+		case "ROOK":
 			color = "#e02929"
 			break;
 	}

@@ -14,11 +14,11 @@ const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
 const colors = ["yellow", "green", "blue", "black"];
 const rook = {
 	number: 20,
-	color: "red"
+	color: "ROOK"
 }
 
 // Declare team size
-const teamSize = 2;
+const teamSize = 1;
 const numTeams = 2;
 const handSize = 10;
 const potSize = 5;
