@@ -356,7 +356,7 @@ function callBet(match) {
 	}
 	else {
 		match.round.roundBetter = match.round.currentBetters[0];
-		console.log('the winner of the best is ', match.round.currentBetters[0].turn);
+		console.log('the winner of the bet is ', match.round.currentBetters[0].turn);
 		io.to(match.matchId).emit("turn off bet");
 		startRound(match);
 	}
