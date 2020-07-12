@@ -6,19 +6,53 @@
 
 var socket = io();
 var canPlayCard = false;
+var canBet = false;
 var logFull = false;
 var playerPoints = [],
 	opponentPoints = [];
-var opponentCard, playerCard, matchWinner, matchEndReason, readyToEnd, timerInterval;
+var opponentCard, playerCard, matchWinner, matchEndReason, readyToEnd; // timerInterval;
+var currentBet = 0;
+var betIncrements = 5;
+
+// Set the countdown timer
+// const turnTimer = 60;
 
 //////////  Socket Events  \\\\\\\\\\
-socket.on("enter match", function() {
-	enterMatch();
+socket.on("enter match", function(team) {
+	enterMatch(team);
 });
 
 socket.on("update cards", function(cards) {
 	updateCards(cards);
 });
+
+socket.on("turn play on", function() {
+	turnOnPlay();
+});
+
+socket.on("turn on bet", function() {
+	turnOnBet();
+});
+
+socket.on("turn off bet", function() {
+	console.log('in turn off bet emitter');
+	labels["currentBet"].visible = false;
+	labels["betting"].visible = false;
+	turnOffBet();
+});
+
+socket.on("update current bet", function(newBet) {
+	currentBet = newBet;
+	labels["currentBet"].text = "Current Bet: " + currentBet;
+})
+
+socket.on("choose cards", function(cards) {
+	chooseCards(cards);
+})
+
+socket.on("choose trumps", function() {
+	chooseTrumps();
+})
 
 socket.on("unknown card played", function() {
 	unknownCardPlayed();
@@ -62,6 +96,7 @@ function enterQueue() {
 	labels["searching"].visible = true;
 }
 
+<<<<<<< HEAD
 /**
  * Called when the player enters a new match
  */
@@ -70,6 +105,11 @@ function enterMatch() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	// Set up player's game screen
+=======
+function enterMatch(team) {
+	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	team = team;
+>>>>>>> refactor
 	playerPoints = [];
 	opponentPoints = [];
 	labels["result"].visible = false;
@@ -79,9 +119,22 @@ function enterMatch() {
 	labels["rematch"].clickable = false;
 	labels["rematch"].disabled = false;
 	labels["waiting"].visible = false;
+<<<<<<< HEAD
 	labels["timer"].text = 60;
 	labels["timer"].visible = true;
 	timerInterval = setInterval(updateTimer, 1000);
+=======
+	// labels["timer"].text = turnTimer;
+	// labels["timer"].visible = true;
+	// timerInterval = setInternval(updateTimer, 1000);
+	// labels["timer"].visible = false;
+
+
+	labels["currentBet"].visible = true;
+	labels["betting"].visible = true;
+
+
+>>>>>>> refactor
 	resetDots(labels["waiting"]);
 	labels["searching"].visible = false;
 	resetDots(labels["searching"]);
@@ -95,18 +148,71 @@ function enterMatch() {
  */
 function updateCards(cards) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> refactor
 	for (var i = 0; i < cards.length; i++) {
 		handSlots[i].card = cards[i];
 	}
+}
+
+function turnOnPlay(){
+	// labels["timer"].text = turnTimer;
+	// labels["timer"].visible = true;
+	// timerInterval = setInterval(updateTimer, 1000);
 	canPlayCard = true;
+}
+
+function turnOnBet(){
+	labels["betting"].visible = false;
+
+	labels["currentBet"].visible = true;
+	labels["bet"].visible = true;
+	labels["pass"].visible = true;
+	canBet = true;
+}
+
+function turnOffBet() {
+	labels["pass"].visible = false;
+	labels["bet"].visible = false;
+	canBet = false;
+}
+
+function turnOffPlay(){
+	// labels["timer"].visible = false;
+	canPlayCard = false;
+}
+
+function handleBet() {
+	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	if (canBet) {
+		console.log('betting');
+		var newBet = currentBet + betIncrements;
+		labels["currentBet"].text = 'Current Bet: ' + newBet;
+		console.log(' new bet ' , newBet);
+		socket.emit("bet", newBet);
+		labels["betting"].visible = true;
+		turnOffBet();
+	}
+}
+
+function handlePass() {
+	console.log('passing');
+	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	if (canBet) {
+		socket.emit("pass");
+		labels["betting"].visible = true;
+		turnOffBet();
+	}
 }
 
 function playCard(index) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canPlayCard) {
 		socket.emit("play card", index);
-		canPlayCard = false;
+		turnOffPlay();
 	}
 }
 
@@ -133,7 +239,7 @@ function displayResult(result) {
 	playerPoints = player.points;
 	opponentPoints = opponent.points;
 	opponentCard = opponent.card;
-	clearInterval(timerInterval);
+	// clearInterval(timerInterval);
 	setTimeout(function() {
 		if (readyToEnd) {
 			endMatch();
@@ -141,8 +247,13 @@ function displayResult(result) {
 			canPlayCard = true;
 			opponentCard = undefined;
 			playerCard = undefined;
+<<<<<<< HEAD
 			labels["timer"].text = 60;
 			timerInterval = setInterval(updateTimer, 1000);
+=======
+			// labels["timer"].text = turnTimer;
+			// timerInterval = setInterval(updateTimer, 1000);
+>>>>>>> refactor
 			canPlayCard = true;
 			socket.emit("request cards update");
 		}
@@ -174,9 +285,15 @@ function endMatch() {
 	labels["rematch"].visible = true;
 	labels["main menu"].visible = true;
 	labels["main menu"].clickable = true;
+<<<<<<< HEAD
 	labels["timer"].visible = false;
 	labels["timer"].text = 60;
 	clearInterval(timerInterval);
+=======
+	// labels["timer"].visible = false;
+	// labels["timer"].text = turnTimer;
+	// clearInterval(timerInterval);
+>>>>>>> refactor
 	matchWinner = undefined;
 	matchEndReason = undefined;
 }
@@ -208,7 +325,7 @@ function requestRematch() {
 }
 
 function animateLabels() {
-	var dotLabels = [labels["waiting"], labels["searching"]];
+	var dotLabels = [labels["waiting"], labels["searching"], labels["betting"]];
 	for (var i = 0; i < dotLabels.length; i++) {
 		if (dotLabels[i].visible) {
 			updateDots(dotLabels[i]);
@@ -226,10 +343,12 @@ function resetDots(label) {
 	label.text = label.text.slice(0, -3) + "...";
 }
 
-function updateTimer() {
-	labels["timer"].text -= 1;
-	if (labels["timer"].text === 0) {
-		canPlayCard = false;
-		clearInterval(timerInterval);
-	}
-}
+// function updateTimer() {
+// 	labels["timer"].text -= 1;
+// 	if (labels["timer"].text === 0) {
+// 		canPlayCard = false;
+// 		clearInterval(timerInterval);
+// 		playCard(0);
+// 		turnOffPlay();
+// 	}
+// }
