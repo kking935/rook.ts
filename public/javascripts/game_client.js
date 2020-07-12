@@ -96,20 +96,9 @@ function enterQueue() {
 	labels["searching"].visible = true;
 }
 
-<<<<<<< HEAD
-/**
- * Called when the player enters a new match
- */
-function enterMatch() {
-	console.log("In client's enterMatch method");
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
-	// Set up player's game screen
-=======
 function enterMatch(team) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	team = team;
->>>>>>> refactor
 	playerPoints = [];
 	opponentPoints = [];
 	labels["result"].visible = false;
@@ -119,11 +108,6 @@ function enterMatch(team) {
 	labels["rematch"].clickable = false;
 	labels["rematch"].disabled = false;
 	labels["waiting"].visible = false;
-<<<<<<< HEAD
-	labels["timer"].text = 60;
-	labels["timer"].visible = true;
-	timerInterval = setInterval(updateTimer, 1000);
-=======
 	// labels["timer"].text = turnTimer;
 	// labels["timer"].visible = true;
 	// timerInterval = setInternval(updateTimer, 1000);
@@ -134,7 +118,6 @@ function enterMatch(team) {
 	labels["betting"].visible = true;
 
 
->>>>>>> refactor
 	resetDots(labels["waiting"]);
 	labels["searching"].visible = false;
 	resetDots(labels["searching"]);
@@ -148,11 +131,7 @@ function enterMatch(team) {
  */
 function updateCards(cards) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-<<<<<<< HEAD
-
-=======
 	
->>>>>>> refactor
 	for (var i = 0; i < cards.length; i++) {
 		handSlots[i].card = cards[i];
 	}
@@ -247,13 +226,8 @@ function displayResult(result) {
 			canPlayCard = true;
 			opponentCard = undefined;
 			playerCard = undefined;
-<<<<<<< HEAD
-			labels["timer"].text = 60;
-			timerInterval = setInterval(updateTimer, 1000);
-=======
 			// labels["timer"].text = turnTimer;
 			// timerInterval = setInterval(updateTimer, 1000);
->>>>>>> refactor
 			canPlayCard = true;
 			socket.emit("request cards update");
 		}
@@ -285,15 +259,9 @@ function endMatch() {
 	labels["rematch"].visible = true;
 	labels["main menu"].visible = true;
 	labels["main menu"].clickable = true;
-<<<<<<< HEAD
-	labels["timer"].visible = false;
-	labels["timer"].text = 60;
-	clearInterval(timerInterval);
-=======
 	// labels["timer"].visible = false;
 	// labels["timer"].text = turnTimer;
 	// clearInterval(timerInterval);
->>>>>>> refactor
 	matchWinner = undefined;
 	matchEndReason = undefined;
 }

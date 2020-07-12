@@ -36,11 +36,7 @@ function init() {
 			card: undefined
 		});
 	}
-<<<<<<< HEAD
-	labels["logo"] = new Label({x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, "ChineseTakeaway");
-=======
 	labels["logo"] = new Label({x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, "3ds");
->>>>>>> refactor
 	labels["play"] = new Label({x: 0.5, y: 0.7}, "Play!", 144, true, true, false, labelFont, enterQueue);
 	labels["searching"] = new Label({x: 0.5, y: 0.7}, "Searching   ", 144, false, false, false, labelFont);
 	labels["result"] = new Label({x: 0.5, y: 0.3}, "", 192, false, false, false, labelFont);
@@ -250,11 +246,7 @@ function drawCard(card, position, scale) {
 	ctx.font = "bold " + (64 * scale * r) + "px 3ds";
 	ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.4);
 	ctx.font = (32 * scale * r) + "px Arial";
-<<<<<<< HEAD
-	// ctx.fillText(types[card.type], position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);
-=======
 	ctx.fillText(card.color, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);
->>>>>>> refactor
 }
 
 function drawPointCard(card, position, scale) {
@@ -271,17 +263,10 @@ function drawPointCard(card, position, scale) {
 	ctx.strokeRect(position.x, position.y, cardWidth * scale, cardWidth * scale);
 	ctx.fillStyle = toColor(card.color);
 	ctx.font = "bold " + (72 * scale * r) + "px Arial";
-<<<<<<< HEAD
-	// ctx.fillText(types[card.type][0], position.x + cardWidth * scale / 2, position.y + cardWidth * scale * 0.5);
-	ctx.strokeStyle = "#ffffff";
-	ctx.lineWidth = 3 * r * scale;
-	// ctx.strokeText(types[card.type][0], position.x + cardWidth * scale / 2, position.y + cardWidth * scale * 0.5);
-=======
 	ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardWidth * scale * 0.5);
 	ctx.strokeStyle = "#ffffff";
 	ctx.lineWidth = 3 * r * scale;
 	ctx.strokeText(card.color, position.x + cardWidth * scale / 2, position.y + cardWidth * scale * 0.5);
->>>>>>> refactor
 }
 
 function drawUnknownCard(position, scale) {
