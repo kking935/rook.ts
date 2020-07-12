@@ -7,7 +7,7 @@ var canBet = false;
 var logFull = false;
 var playerPoints = [],
 	opponentPoints = [];
-var opponentCard, playerCard, matchWinner, matchEndReason, readyToEnd; // timerInterval;
+var opponentCard, playerCard, winningTeam, matchEndReason, readyToEnd; // timerInterval;
 var currentBet = 0;
 var betIncrements = 5;
 
@@ -59,13 +59,12 @@ socket.on("fight result", function(result) {
 	displayResult(result);
 });
 
-socket.on("end match", function(winner, reason) {
-	matchWinner = winner;
+socket.on("end match", function(winners, reason) {
+	console.log('end of match');
+	winningTeam = winners;
 	matchEndReason = reason;
 	readyToEnd = true;
-	if (canPlayCard) {
-		endMatch();
-	}
+	endMatch();	
 });
 
 socket.on("no rematch", function() {
@@ -86,9 +85,10 @@ function enterQueue() {
 	labels["searching"].visible = true;
 }
 
-function enterMatch(team) {
+function enterMatch(newTeam) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	team = team;
+	team = newTeam;
+	console.log('joining team  ', team);
 	playerPoints = [];
 	opponentPoints = [];
 	labels["result"].visible = false;
@@ -218,25 +218,31 @@ function displayResult(result) {
 
 function endMatch() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
+	console.log('winning team is ', winningTeam);
 	canPlayCard = false;
 	readyToEnd = false;
 	opponentCard = undefined;
 	playerCard = undefined;
 	displayCardSlots = false;
+	labels["betting"].visible = false;
+	labels["currentBet"].visible = false;
+	turnOffBet();
+
 	for (var i = 0; i < handSlots.length; i++) {
 		handSlots[i].card = undefined;
 	}
 
 	if (matchEndReason === "player left") {
-		var reason = ["Your opponent", "You"][+(socket.id !== matchWinner)] + " left the match";
+		var reason = ["Your opponent", "You"][+(team.id !== winningTeam.id)] + " left the match";
 		labels["rematch"].disabled = true;
 		labels["rematch"].clickable = false;
 	} else {
-		var reason = ["Your opponent has", "You have"][+(socket.id === matchWinner)] + " a full set";
+		var reason = ["Your opponent has", "You have"][+(team.id === winningTeam.id)] + " a full set";
 		labels["rematch"].clickable = true;
 	}
 
-	labels["result"].text = ["You Lose!", "You Win!"][+(socket.id === matchWinner)];
+	labels["result"].text = ["You Lose!", "You Win!"][+(team.id === winningTeam.id)];
 	labels["result"].visible = true;
 	labels["rematch"].visible = true;
 	labels["main menu"].visible = true;
@@ -244,7 +250,7 @@ function endMatch() {
 	// labels["timer"].visible = false;
 	// labels["timer"].text = turnTimer;
 	// clearInterval(timerInterval);
-	matchWinner = undefined;
+	winningTeam = undefined;
 	matchEndReason = undefined;
 }
 

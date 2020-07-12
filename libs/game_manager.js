@@ -210,7 +210,10 @@ function createMatch(participants) {
 	}
 
 	matches.push(match);
-	io.to(id).emit("enter match");
+	console.log('players: ', players);
+	for (var x = 0; x < players.length; x++) {
+		players[x].socket.emit("enter match", players[x].team);
+	}
 	// match.timerActive = true;
 
 	callBet(match);
@@ -618,9 +621,10 @@ function leaveMatch(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	var match = findMatchBySocketId(socket.id);
+	var player = findPlayerById(socket.id);
 	if (match) {
 		if (!match.isOver) {
-			endMatch(match, "player left");
+			endMatch(match, player, "player left");
 		} else {
 			io.to(match.matchId).emit("no rematch");
 		}
@@ -634,13 +638,16 @@ function leaveMatch(socket) {
  * @param {*} winner 	The winners of the match (an array of players)
  * @param {*} reason 	The reason they won
  */
-function endMatch(match, reason) {
+function endMatch(match, player, reason) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	var winningTeam = undefined;
-	for (var team in teams){
-		if (team.points > winningTeam.points){
-			winningTeam = team;
+	var winningTeam = match.teams[0];
+	if (player.team.id === winningTeam.id) {
+		winningTeam = match.teams[1];
+	}
+	for (var x = 0; x < match.teams.length; x++){
+		if (match.teams[x].points > winningTeam.points){
+			winningTeam = match.teams[x];
 		}
 	}
 
