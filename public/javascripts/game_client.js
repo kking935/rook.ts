@@ -38,9 +38,21 @@ socket.on("turn off bet", function() {
 	turnOffBet();
 });
 
-socket.on("update current bet", function(newBet) {
+socket.on("update current bet", function(newBet, bettingTeamId) {
 	currentBet = newBet;
+	console.log('in update current bet where bet is ', newBet, ' and betting team is ', bettingTeamId);
 	labels["currentBet"].text = "Current Bet: " + currentBet;
+
+	labels["currentBet"].color1 = "#0f0f0f";
+
+	if (team.id === bettingTeamId) {
+		console.log('setting color to green')
+		labels["currentBet"].color2 = "#52a546";
+	}
+	else {
+		console.log('setting color to red')
+		labels["currentBet"].color2 = "#e02929";
+	}
 })
 
 socket.on("choose cards", function(cards) {

@@ -17,6 +17,8 @@ function Label(position, text, size, visible, clickable, disabled, font, callbac
 	this.down = false;
 	this.font = font;
 	this.callback = callback;
+	this.color1 = "#9a9a9a"
+	this.color2 = "#000000";
 }
 
 //////////  Canvas  \\\\\\\\\\
@@ -47,7 +49,7 @@ function init() {
 	labels["currentBet"] = new Label({x: 0.5, y: 0.1}, "Current Bet: 0", 128, false, false, false, labelFont);
 	labels["bet"] = new Label({x: 0.25, y: 0.3}, "Bet", 98, false, true, false, labelFont, handleBet);
 	labels["pass"] = new Label({x: 0.75, y: 0.3}, "Pass", 98, false, true, false, labelFont, handlePass);
-	labels["betting"] = new Label({x: 0.5, y: 0.4}, "Betting   ", 144, false, false, false, labelFont);
+	labels["betting"] = new Label({x: 0.5, y: 0.4}, "Waiting for other players to bet   ", 65, false, false, false, labelFont);
 }
 
 function animate() {
@@ -312,14 +314,15 @@ function drawPoints() {
 }
 
 function drawLabel(label) {
+	console.log('drawing label ', label.text)
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
 	ctx.font = (label.size * r) + "px " + label.font;
 	var shadowDistance = label.size / 30;
 	if (!label.disabled) {
-		ctx.fillStyle = "#9a9a9a";
+		ctx.fillStyle = label.color1;
 		ctx.fillText(label.text, canvas.width * label.position.x + (shadowDistance * r), canvas.height * label.position.y + (shadowDistance * r));
-		ctx.fillStyle = "#000000";
+		ctx.fillStyle = label.color2;
 	} else {
 		ctx.fillStyle = "#9a9a9a";
 	}
@@ -382,9 +385,9 @@ var clickCursor = false,
 	aspect = 16 / 10,
 	labels = [],
 	labelFont = "RagingRedLotusBB";
-var typeColors = ["#FF8B26", "#1260E6", "#74D5F2"];
-var types = ["Fire", "Water", "Ice"];
-var colors = {"yellow": "#fdee00", "orange": "#ffb235", "green": "#52a546", "blue": "#246acd", "red": "#e02929", "purple": "#9738af"};
+// var typeColors = ["#FF8B26", "#1260E6", "#74D5F2"];
+// var types = ["Fire", "Water", "Ice"];
+// var colors = {"yellow": "#fdee00", "orange": "#ffb235", "green": "#52a546", "blue": "#246acd", "red": "#e02929", "purple": "#9738af"};
 
 init();
 animate();

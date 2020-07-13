@@ -18,7 +18,7 @@ const rook = {
 }
 
 // Declare team size
-const teamSize = 2;
+const teamSize = 1;
 const numTeams = 2;
 const handSize = 10;
 const potSize = 5;
@@ -50,7 +50,7 @@ module.exports.listen = function(app) {
 
 		socket.on("bet", function(bet) {
 			console.log('bet recieved');
-			io.to(findMatchBySocketId(socket.id).matchId).emit('update current bet', bet);
+			io.to(findMatchBySocketId(socket.id).matchId).emit('update current bet', bet, findPlayerById(socket.id).team.id);
 			handleBet(socket, bet);
 		});
 
