@@ -18,7 +18,7 @@ const rook = {
 }
 
 // Declare team size
-const teamSize = 1;
+const teamSize = 2;
 const numTeams = 2;
 const handSize = 10;
 const potSize = 5;

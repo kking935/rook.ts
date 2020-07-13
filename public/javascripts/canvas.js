@@ -30,7 +30,7 @@ function init() {
 	for (var i = 0; i < handSize; i++) {
 		handSlots.push({
 			position: {
-				x: canvas.width / 6 * i - cardWidth / 2,
+				x: canvas.width / handSize * i - cardWidth / 2,
 				y: canvas.height - cardHeight * 1.1
 			},
 			card: undefined
@@ -185,7 +185,7 @@ function handleResize() {
 	if (handSlots) {
 		for (var i = 1; i < 6; i++) {
 			handSlots[i-1].position = {
-				x: canvas.width / 6 * i - cardWidth / 2,
+				x: canvas.width / handSize * i - cardWidth / 2,
 				y: canvas.height - cardHeight * 1.1
 			};
 		}
@@ -253,6 +253,7 @@ function drawPointCard(card, position, scale) {
 	if (!scale) {
 		scale = 1;
 	}
+	console.log('i made it to draw point card');
 
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
@@ -295,6 +296,8 @@ function drawEmptySlot(slot) {
 }
 
 function drawPoints() {
+	console.log('i made it to draw points');
+
 	for (var i = 0; i < playerPoints.length; i++) {
 		for (var j = playerPoints[i].length - 1; j >= 0; j--) {
 			drawPointCard(playerPoints[i][j], {x: cardWidth * 0.55 * i + 10 * r, y: cardHeight * 0.5 * j * 0.2 + 10 * r}, 0.5);
@@ -331,10 +334,10 @@ function chooseCards(cards) {
 console.log('here');
 
 	for (var i = 0; i < cards.length; i++) {
-console.log('trying to draw');
+		console.log('trying to draw');
 		var card = cards[i];
 		var position = {
-				x: canvas.width / 6 * i - cardWidth / 2,
+				x: canvas.width / handSize * i - cardWidth / 2,
 				y: canvas.height - cardHeight * 0.9
 		}
 		

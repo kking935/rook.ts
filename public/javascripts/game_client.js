@@ -244,7 +244,7 @@ function quitMatch() {
 	labels["rematch"].clickable = false;
 
 	labels["result"].text = "A Player Disconnected";
-	labels["result"].size = 100;
+	labels["result"].size = 90;
 	labels["result"].visible = true;
 	labels["rematch"].visible = true;
 	labels["main menu"].visible = true;
