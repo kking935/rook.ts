@@ -32,7 +32,7 @@ function init() {
 	for (var i = 0; i < handSize; i++) {
 		handSlots.push({
 			position: {
-				x: canvas.width / handSize * i - cardWidth / 2,
+				x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
 				y: canvas.height - cardHeight * 1.1
 			},
 			card: undefined
@@ -61,7 +61,7 @@ function toColor(colorStr) {
 	var color = undefined;
 	switch (colorStr) {
 		case "yellow":
-			color = "#fdee00";
+			color = "#CCCC00";
 			break;
 		case "green":
 			color = "#52a546";
@@ -185,9 +185,9 @@ function handleResize() {
 	cardWidth = 120 * r;
 	cardHeight = cardWidth * 1.5;
 	if (handSlots) {
-		for (var i = 1; i < 6; i++) {
-			handSlots[i-1].position = {
-				x: canvas.width / handSize * i - cardWidth / 2,
+		for (var i = 0; i < handSize; i++) {
+			handSlots[i].position = {
+				x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
 				y: canvas.height - cardHeight * 1.1
 			};
 		}
@@ -248,7 +248,7 @@ function drawCard(card, position, scale) {
 	ctx.font = "bold " + (64 * scale * r) + "px 3ds";
 	ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.4);
 	ctx.font = (32 * scale * r) + "px Arial";
-	ctx.fillText(card.color, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);
+	ctx.fillText(card.color, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);	
 }
 
 function drawPointCard(card, position, scale) {

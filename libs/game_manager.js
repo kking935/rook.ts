@@ -179,7 +179,7 @@ function createMatch(participants) {
 		var playerObject = {
 			socket: participants[participant].socket,
 			// Add player to next team in order
-			team: newTeams[Math.floor(participant / teamSize)],
+			team: newTeams[Math.floor(participant % teamSize)],
 			turn: participant,
 			// Deal them a hand
 			cards: dealHand(newDeck, handSize),
