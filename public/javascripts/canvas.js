@@ -38,7 +38,7 @@ function init() {
 			card: undefined
 		});
 	}
-	labels["logo"] = new Label({x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, "3ds");
+	labels["logo"] = new Label({x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, "Arial");
 	labels["play"] = new Label({x: 0.5, y: 0.7}, "Play!", 144, true, true, false, labelFont, enterQueue);
 	labels["searching"] = new Label({x: 0.5, y: 0.7}, "Searching   ", 144, false, false, false, labelFont);
 	labels["result"] = new Label({x: 0.5, y: 0.3}, "", 192, false, false, false, labelFont);
@@ -182,7 +182,7 @@ function handleResize() {
 		canvas.height = window.innerHeight * 0.9;
 		r = canvas.height * aspect / 1000;
 	}
-	cardWidth = 120 * r;
+	cardWidth = 90 * r;
 	cardHeight = cardWidth * 1.5;
 	if (handSlots) {
 		for (var i = 0; i < handSize; i++) {
@@ -209,7 +209,7 @@ function draw() {
 		}
 	}
 	drawPoints();
-	if (playerCard) {
+	if (playerCard) {3
 		drawCard(playerCard, playerCardPosition, 1.5);
 	}
 	if (opponentCard) {
@@ -245,9 +245,9 @@ function drawCard(card, position, scale) {
 	// console.log("ctx.fillStyle = toColor(", card.color, ")");
 
 	ctx.fillStyle = toColor(card.color);
-	ctx.font = "bold " + (64 * scale * r) + "px 3ds";
+	ctx.font = "bold " + (50 * scale * r) + "px Arial";
 	ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.4);
-	ctx.font = (32 * scale * r) + "px Arial";
+	ctx.font = (20 * scale * r) + "px Arial";
 	ctx.fillText(card.color, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);	
 }
 
@@ -255,7 +255,6 @@ function drawPointCard(card, position, scale) {
 	if (!scale) {
 		scale = 1;
 	}
-	console.log('i made it to draw point card');
 
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
@@ -298,7 +297,6 @@ function drawEmptySlot(slot) {
 }
 
 function drawPoints() {
-	console.log('i made it to draw points');
 
 	for (var i = 0; i < playerPoints.length; i++) {
 		for (var j = playerPoints[i].length - 1; j >= 0; j--) {
@@ -314,7 +312,6 @@ function drawPoints() {
 }
 
 function drawLabel(label) {
-	console.log('drawing label ', label.text)
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
 	ctx.font = (label.size * r) + "px " + label.font;
@@ -334,10 +331,8 @@ function drawLabel(label) {
 }
 
 function chooseCards(cards) {
-console.log('here');
 
 	for (var i = 0; i < cards.length; i++) {
-		console.log('trying to draw');
 		var card = cards[i];
 		var position = {
 				x: canvas.width / handSize * i - cardWidth / 2,
@@ -357,7 +352,7 @@ console.log('here');
 		// console.log("ctx.fillStyle = toColor(", card.color, ")");
 	
 		ctx.fillStyle = toColor(card.color);
-		ctx.font = "bold " + (64 * scale * r) + "px 3ds";
+		ctx.font = "bold " + (64 * scale * r) + "px Arial";
 		ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.4);
 		ctx.font = (32 * scale * r) + "px Arial";
 		ctx.fillText(card.color, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);	

@@ -32,7 +32,6 @@ socket.on("turn on bet", function() {
 });
 
 socket.on("turn off bet", function() {
-	console.log('in turn off bet emitter');
 	labels["currentBet"].visible = false;
 	labels["betting"].visible = false;
 	turnOffBet();
@@ -40,17 +39,14 @@ socket.on("turn off bet", function() {
 
 socket.on("update current bet", function(newBet, bettingTeamId) {
 	currentBet = newBet;
-	console.log('in update current bet where bet is ', newBet, ' and betting team is ', bettingTeamId);
 	labels["currentBet"].text = "Current Bet: " + currentBet;
 
 	labels["currentBet"].color1 = "#0f0f0f";
 
 	if (team.id === bettingTeamId) {
-		console.log('setting color to green')
 		labels["currentBet"].color2 = "#52a546";
 	}
 	else {
-		console.log('setting color to red')
 		labels["currentBet"].color2 = "#e02929";
 	}
 })
@@ -72,7 +68,6 @@ socket.on("fight result", function(result) {
 });
 
 socket.on("quit match", function(reason) {
-	console.log('end of match');
 	matchEndReason = reason;
 	readyToEnd = true;
 	quitMatch();	
@@ -80,7 +75,6 @@ socket.on("quit match", function(reason) {
 
 
 socket.on("end match", function(winners, reason) {
-	console.log('end of match');
 	winningTeam = winners;
 	matchEndReason = reason;
 	readyToEnd = true;
@@ -108,7 +102,6 @@ function enterQueue() {
 function enterMatch(newTeam) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	team = newTeam;
-	console.log('joining team  ', team);
 	playerPoints = [];
 	opponentPoints = [];
 	labels["result"].visible = false;
@@ -173,10 +166,8 @@ function turnOffPlay(){
 function handleBet() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canBet) {
-		console.log('betting');
 		var newBet = currentBet + betIncrements;
 		labels["currentBet"].text = 'Current Bet: ' + newBet;
-		console.log(' new bet ' , newBet);
 		socket.emit("bet", newBet);
 		labels["betting"].visible = true;
 		turnOffBet();
@@ -184,7 +175,6 @@ function handleBet() {
 }
 
 function handlePass() {
-	console.log('passing');
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	if (canBet) {
 		socket.emit("pass");
@@ -271,7 +261,6 @@ function quitMatch() {
 function endMatch() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	console.log('winning team is ', winningTeam);
 	canPlayCard = false;
 	readyToEnd = false;
 	opponentCard = undefined;

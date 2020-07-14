@@ -393,8 +393,8 @@ function handlePass(socket) {
 }
 
 function startRound(match) {
-	
-	match.round.roundBetter.socket.emit('choose cards', match.round.pot);
+	// match.round.roundBetter.socket.emit('choose cards', match.round.pot);
+	handleTurn(match);
 }
 
 /**
