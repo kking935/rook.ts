@@ -192,6 +192,16 @@ function handleResize() {
 			};
 		}
 	}
+
+	if (chooseSlots) {
+		for (var i = 0; i < potSize; i++) {
+			chooseSlots[i].position = {
+				x: canvas.width * 0.05 + canvas.width / potSize * i - cardWidth / 2,
+				y: canvas.height * 0.3 - cardHeight * 1.1
+			};
+		}
+	}
+
 	playerCardPosition = {x: canvas.width * 0.17, y: canvas.height * 0.15};
 	opponentCardPosition = {x: canvas.width * 0.83 - cardWidth * 1.5, y: canvas.height * 0.15};
 }
@@ -330,31 +340,49 @@ function drawLabel(label) {
 	}
 }
 
-function chooseCards(cards) {
+function chooseCards(cards, scale) {
+
+	if (!scale) {
+		scale = 1;
+	}
+
+	console.log('in choose cards')
+
+	this.chooseSlots = [];
 
 	for (var i = 0; i < cards.length; i++) {
+		console.log('card is ', card)
 		var card = cards[i];
 		var position = {
-				x: canvas.width / handSize * i - cardWidth / 2,
-				y: canvas.height - cardHeight * 0.9
+			x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
+			y: canvas.height * 0.3 - cardHeight * 1.1
 		}
+
+		chooseSlots.push({
+			...card,
+			position
+		});
+
+		card = chooseSlots[i];
+
+		console.log('new slot : ', card);
 		
 		ctx.textBaseline = "middle";
 		ctx.textAlign = "center";
 		// console.log("ctx.fillStyle = toColor(", card.color, ")");
 		ctx.fillStyle = toColor(card.color);
-		ctx.fillRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
+		ctx.fillRect(card.position.x, card.position.y, cardWidth * scale, cardHeight * scale);
 		ctx.strokeStyle = "#000000";
 		ctx.lineWidth = 2 * scale * r;
-		ctx.strokeRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
+		ctx.strokeRect(card.position.x, card.position.y, cardWidth * scale, cardHeight * scale);
 		ctx.fillStyle = "#ffffff";
-		ctx.fillRect(position.x + cardWidth * scale * 0.1, position.y + cardHeight * scale * 0.067, cardWidth * scale * 0.8, cardHeight * scale * 0.866);
+		ctx.fillRect(card.position.x + cardWidth * scale * 0.1, card.position.y + cardHeight * scale * 0.067, cardWidth * scale * 0.8, cardHeight * scale * 0.866);
 		// console.log("ctx.fillStyle = toColor(", card.color, ")");
 	
 		ctx.fillStyle = toColor(card.color);
-		ctx.font = "bold " + (64 * scale * r) + "px Arial";
+		ctx.font = "bold " + (604 * scale * r) + "px Arial";
 		ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.4);
-		ctx.font = (32 * scale * r) + "px Arial";
+		ctx.font = (302 * scale * r) + "px Arial";
 		ctx.fillText(card.color, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.7);	
 	}
 }
@@ -374,7 +402,7 @@ window.requestAnimFrame = (function () {
 		   };
 })();
 
-var handSlots, canvas, ctx, horizontalCenter, verticalCenter, clickPos, clickedCard, cardWidth, cardHeight, playerCardPosition, opponentCardPosition;
+var handSlots, chooseSlots, canvas, ctx, horizontalCenter, verticalCenter, clickPos, clickedCard, cardWidth, cardHeight, playerCardPosition, opponentCardPosition;
 var clickCursor = false,
 	displayCardSlots = false,
 	aspect = 16 / 10,

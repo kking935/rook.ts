@@ -164,9 +164,7 @@ function createMatch(participants) {
 	var newPlayers = [];
 
 	var newTeams = [];
-	for (var team = 0; 
-		team < Math.floor(participants.length / teamSize); 
-		team++) {
+	for (var team = 0; team < numTeams; team++) {
 		newTeams.push({
 			id: team,
 			points: 0
@@ -176,10 +174,11 @@ function createMatch(participants) {
 	// Iterate over each participant
 	for (var participant = 0; participant < participants.length; participant++) {
 		// Create a new playerObject
+		console.log('Adding player to team : ', Math.floor(participant % numTeams))
 		var playerObject = {
 			socket: participants[participant].socket,
 			// Add player to next team in order
-			team: newTeams[Math.floor(participant % teamSize)],
+			team: newTeams[Math.floor(participant % numTeams)],
 			turn: participant,
 			// Deal them a hand
 			cards: dealHand(newDeck, handSize),
@@ -393,8 +392,8 @@ function handlePass(socket) {
 }
 
 function startRound(match) {
-	// match.round.roundBetter.socket.emit('choose cards', match.round.pot);
-	handleTurn(match);
+	match.round.roundBetter.socket.emit('choose cards', match.round.pot);
+	// handleTurn(match);
 }
 
 /**

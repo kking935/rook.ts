@@ -52,7 +52,7 @@ socket.on("update current bet", function(newBet, bettingTeamId) {
 })
 
 socket.on("choose cards", function(cards) {
-	chooseCards(cards);
+	chooseCards(cards, 1);
 })
 
 socket.on("choose trumps", function() {
