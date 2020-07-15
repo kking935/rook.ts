@@ -4,6 +4,7 @@
 var socket = io();
 var canPlayCard = false;
 var canBet = false;
+var canChooseCards = false;
 var logFull = false;
 var playerPoints = [],
 	opponentPoints = [];
@@ -52,7 +53,9 @@ socket.on("update current bet", function(newBet, bettingTeamId) {
 })
 
 socket.on("choose cards", function(cards) {
-	chooseCards(cards, 1);
+	canChooseCards = true;
+	labels["chooseCards"].visible = true;
+	updateChooseCards(cards, 1);
 })
 
 socket.on("choose trumps", function() {
@@ -133,6 +136,14 @@ function updateCards(cards) {
 	
 	for (var i = 0; i < cards.length; i++) {
 		handSlots[i].card = cards[i];
+	}
+}
+
+function updateChooseCards(cards) {
+	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
+	for (var i = 0; i < cards.length; i++) {
+		chooseSlots[i].card = cards[i];
 	}
 }
 
@@ -242,6 +253,10 @@ function quitMatch() {
 		handSlots[i].card = undefined;
 	}
 
+	for (var i = 0; i < chooseSlots.length; i++) {
+		chooseSlots[i].card = undefined;
+	}
+
 	labels["rematch"].disabled = true;
 	labels["rematch"].clickable = false;
 
@@ -272,6 +287,10 @@ function endMatch() {
 
 	for (var i = 0; i < handSlots.length; i++) {
 		handSlots[i].card = undefined;
+	}
+
+	for (var i = 0; i < chooseSlots.length; i++) {
+		chooseSlots[i].card = undefined;
 	}
 
 	if (matchEndReason === "player left") {
@@ -322,7 +341,7 @@ function requestRematch() {
 }
 
 function animateLabels() {
-	var dotLabels = [labels["waiting"], labels["searching"], labels["betting"]];
+	var dotLabels = [labels["waiting"], labels["searching"], labels["betting"], labels["chooseCards"]];
 	for (var i = 0; i < dotLabels.length; i++) {
 		if (dotLabels[i].visible) {
 			updateDots(dotLabels[i]);
