@@ -30,6 +30,7 @@ function init() {
 	handSlots = [];
 	chooseSlots = [];
 	team = undefined;
+
 	for (var i = 0; i < handSize; i++) {
 		handSlots.push({
 			position: {
@@ -44,8 +45,9 @@ function init() {
 		chooseSlots.push({
 			position: {
 				x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
-				y: canvas.height / 2 - cardHeight * 1.1
-			}
+				y: canvas.height - cardHeight * 1.1 * 2
+			},
+			card: undefined
 		})
 	}
 
@@ -230,7 +232,7 @@ function handleResize() {
 		for (var i = 0; i < potSize; i++) {
 			chooseSlots[i].position = {
 				x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
-				y: canvas.height / 2 - cardHeight * 1.1
+				y: canvas.height - cardHeight * 1.1 * 2
 			};
 		}
 	}
@@ -252,7 +254,7 @@ function draw() {
 		}
 	}
 
-	for (var x = 0; x < potSize.length; x++) {
+	for (var x = 0; x < chooseSlots.length; x++) {
 		if (displayChooseSlots) {
 			if (chooseSlots[x].card) {
 				drawCard(chooseSlots[x].card, chooseSlots[x].position, 1)

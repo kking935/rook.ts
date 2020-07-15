@@ -237,7 +237,7 @@ function displayResult(result) {
 	}, (2 * 1000));
 }
 
-function quitMatch() {
+function prepareForEnd(){
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	canPlayCard = false;
@@ -256,6 +256,10 @@ function quitMatch() {
 	for (var i = 0; i < chooseSlots.length; i++) {
 		chooseSlots[i].card = undefined;
 	}
+}
+
+function quitMatch() {
+	prepareForEnd();
 
 	labels["rematch"].disabled = true;
 	labels["rematch"].clickable = false;
@@ -274,24 +278,7 @@ function quitMatch() {
 }
 
 function endMatch() {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-	canPlayCard = false;
-	readyToEnd = false;
-	opponentCard = undefined;
-	playerCard = undefined;
-	displayCardSlots = false;
-	labels["betting"].visible = false;
-	labels["currentBet"].visible = false;
-	turnOffBet();
-
-	for (var i = 0; i < handSlots.length; i++) {
-		handSlots[i].card = undefined;
-	}
-
-	for (var i = 0; i < chooseSlots.length; i++) {
-		chooseSlots[i].card = undefined;
-	}
+	prepareForEnd();
 
 	if (matchEndReason === "player left") {
 		var reason = ["Your opponent", "You"][+(team.id !== winningTeam.id)] + " left the match";
