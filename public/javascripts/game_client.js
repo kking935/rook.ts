@@ -39,17 +39,7 @@ socket.on("turn off bet", function() {
 });
 
 socket.on("update current bet", function(newBet, bettingTeamId) {
-	currentBet = newBet;
-	labels["currentBet"].text = "Current Bet: " + currentBet;
-
-	labels["currentBet"].color1 = "#0f0f0f";
-
-	if (team.id === bettingTeamId) {
-		labels["currentBet"].color2 = "#52a546";
-	}
-	else {
-		labels["currentBet"].color2 = "#e02929";
-	}
+	updateCurrentBet(newBet, bettingTeamId);
 })
 
 socket.on("choose cards", function(cards) {
@@ -57,6 +47,15 @@ socket.on("choose cards", function(cards) {
 	displayChooseSlots = true;
 	labels["chooseCards"].visible = true;
 	updateChooseCards(cards, 1);
+})
+
+socket.on("waiting on bet winner to choose cards", function() {
+	console.log('in here waiting')
+	labels["playerChoosingCards"].visible = true;
+})
+
+socket.on("waiting on bet winner to choose trumps", function() {
+	labels["playerChoosingTrumps"].visible = true;
 })
 
 socket.on("choose trumps", function() {
@@ -137,6 +136,20 @@ function updateCards(cards) {
 	
 	for (var i = 0; i < cards.length; i++) {
 		handSlots[i].card = cards[i];
+	}
+}
+
+function updateCurrentBet(newBet, bettingTeamId) {
+	currentBet = newBet;
+	labels["currentBet"].text = "Current Bet: " + currentBet;
+
+	labels["currentBet"].color1 = "#0f0f0f";
+
+	if (team.id === bettingTeamId) {
+		labels["currentBet"].color2 = "#52a546";
+	}
+	else {
+		labels["currentBet"].color2 = "#e02929";
 	}
 }
 
@@ -339,7 +352,7 @@ function requestRematch() {
 }
 
 function animateLabels() {
-	var dotLabels = [labels["waiting"], labels["searching"], labels["betting"], labels["chooseCards"]];
+	var dotLabels = [labels["waiting"], labels["searching"], labels["betting"], labels["chooseCards"], labels["playerChoosingCards"], labels["playerChoosingTrumps"]];
 	for (var i = 0; i < dotLabels.length; i++) {
 		if (dotLabels[i].visible) {
 			updateDots(dotLabels[i]);

@@ -225,7 +225,7 @@ function createRound(roundNumber, deck) {
 		turnToBet: 0,						// The turn for the bet
 		bet: 0,								// The bet for this round
 		roundBetter: undefined,				// The team that bet on this round
-		currentBetters: players,			// Initialize the round's betters to be all the players
+		currentBetters: players.slice(0),			// Initialize the round's betters to be all the players
 		trumps: undefined,					// The card color for trumps
 		ciruit: createCircuit()				// The circuit of plays
 	}
@@ -384,7 +384,9 @@ function handlePass(socket) {
 	var match = findMatchBySocketId(socket.id);
 	var player = findPlayerById(socket.id);
 
+	console.log('Before splice ', match.players.length)
 	match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);
+	console.log('After splice ', match.players.length)
 	
 	// keep turns the same
 	// match.round.turnToBet = match.round.turnToBet
@@ -392,7 +394,17 @@ function handlePass(socket) {
 }
 
 function startRound(match) {
-	match.round.roundBetter.socket.emit('choose cards', match.round.pot);
+	console.log('length ', match.players.length)
+	for (var i = 0; i < match.players.length; i++) {
+		if (match.players[i] === match.round.roundBetter ) {
+			match.round.roundBetter.socket.emit('choose cards', match.round.pot);
+		}
+		else {
+			console.log('in here calling wait ', match.players[i].socket)
+
+			match.players[i].socket.emit('waiting on bet winner to choose cards')
+		}
+	}
 	// handleTurn(match);
 }
 

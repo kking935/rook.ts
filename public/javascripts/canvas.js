@@ -63,7 +63,9 @@ function init() {
 	labels["bet"] = new Label({x: 0.25, y: 0.3}, "Bet", 98, false, true, false, labelFont, handleBet);
 	labels["pass"] = new Label({x: 0.75, y: 0.3}, "Pass", 98, false, true, false, labelFont, handlePass);
 	labels["betting"] = new Label({x: 0.5, y: 0.4}, "Waiting for other players to bet   ", 65, false, false, false, labelFont);
-	labels["chooseCards"] = new Label({x: 0.5, y: 0.1}, "Choose which cards to discard   ", 65, false, false, false, labelFont )
+	labels["chooseCards"] = new Label({x: 0.5, y: 0.1}, "Choose which cards to discard   ", 65, false, false, false, labelFont);
+	labels["playerChoosingCards"] = new Label({x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
+	labels["playerChoosingTrumps"] = new Label({x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, labelFont);
 }
 
 function animate() {
