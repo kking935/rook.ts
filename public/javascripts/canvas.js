@@ -231,7 +231,7 @@ function handleResize() {
 		console.log('resizing chooseSLots');
 		for (var i = 0; i < potSize; i++) {
 			chooseSlots[i].position = {
-				x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
+				x: canvas.width * 0.3 + canvas.width / handSize * i - cardWidth / 2,
 				y: canvas.height - cardHeight * 1.1 * 3
 			};
 		}
