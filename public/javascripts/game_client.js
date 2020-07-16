@@ -54,6 +54,7 @@ socket.on("update current bet", function(newBet, bettingTeamId) {
 
 socket.on("choose cards", function(cards) {
 	canChooseCards = true;
+	displayChooseSlots = true;
 	labels["chooseCards"].visible = true;
 	updateChooseCards(cards, 1);
 })
@@ -141,10 +142,12 @@ function updateCards(cards) {
 
 function updateChooseCards(cards) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
+	console.log('choose cards: ', cards);
 	for (var i = 0; i < cards.length; i++) {
 		chooseSlots[i].card = cards[i];
 	}
+	console.log('new chooseSlots: ', chooseSlots);
+	handleResize();
 }
 
 function turnOnPlay(){
@@ -165,8 +168,16 @@ function turnOnBet(){
 
 function turnOffBet() {
 	labels["pass"].visible = false;
+	labels["pass"].clickable = false;
 	labels["bet"].visible = false;
+	labels["bet"].clickable = false;
 	canBet = false;
+}
+
+function doneChoosingCards() {
+	canChooseCards = false;
+	displayChooseSlots = false;
+	socket.emit('choose cards', handSlots)
 }
 
 function turnOffPlay(){

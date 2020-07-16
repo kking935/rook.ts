@@ -45,7 +45,7 @@ function init() {
 		chooseSlots.push({
 			position: {
 				x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
-				y: canvas.height - cardHeight * 1.1 * 2
+				y: canvas.height - cardHeight * 1.1
 			},
 			card: undefined
 		})
@@ -232,7 +232,7 @@ function handleResize() {
 		for (var i = 0; i < potSize; i++) {
 			chooseSlots[i].position = {
 				x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
-				y: canvas.height - cardHeight * 1.1 * 2
+				y: canvas.height - cardHeight * 1.1 * 3
 			};
 		}
 	}
@@ -285,8 +285,6 @@ function drawCard(card, position, scale) {
 	if (!scale) {
 		scale = 1;
 	}
-	if (canChooseCards && card.number % 10 == 0)
-	console.log('drawing card ', card, ' at position ', position)
 
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
