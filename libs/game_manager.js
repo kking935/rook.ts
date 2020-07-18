@@ -3,30 +3,22 @@
 var socketio = require("socket.io");
 const e = require("express");
 
+var logFull = false;
+
 var players = [];
 var queue = [];
 var matches = [];
 var rematchRequests = [];
 
 var goalPoints = 500;
-
-const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
-const colors = ["yellow", "green", "blue", "black"];
-const rook = {
-	number: 20,
-	color: "ROOK"
-}
-
-// Declare team size
 const teamSize = 1;
 const numTeams = 2;
 const handSize = 10;
 const potSize = 5;
 
-var logFull = false;
-// const timerDuration = 60;
-
-// updateTimers();
+const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
+const colors = ["yellow", "green", "blue", "black"];
+const rook = { number: 20, color: "ROOK" }
 
 //////////  Socket.io  \\\\\\\\\\
 module.exports.listen = function(app) {
@@ -49,7 +41,6 @@ module.exports.listen = function(app) {
 		});
 
 		socket.on("bet", function(bet) {
-			console.log('bet recieved');
 			io.to(findMatchBySocketId(socket.id).matchId).emit('update current bet', bet, findPlayerById(socket.id).team.id);
 			handleBet(socket, bet);
 		});
@@ -154,16 +145,11 @@ function leaveQueue(socket) {
 function createMatch(participants) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
-	// Create unique id for match
 	var id = createId();
-
-	// Create a deck before assigning hands to players
 	var newDeck = shuffleDeck(generateDeck());
-
-	// Create array for players
 	var newPlayers = [];
-
 	var newTeams = [];
+	
 	for (var team = 0; team < numTeams; team++) {
 		newTeams.push({
 			id: team,
@@ -171,16 +157,11 @@ function createMatch(participants) {
 		})
 	}
 
-	// Iterate over each participant
 	for (var participant = 0; participant < participants.length; participant++) {
-		// Create a new playerObject
-		console.log('Adding player to team : ', Math.floor(participant % numTeams))
 		var playerObject = {
 			socket: participants[participant].socket,
-			// Add player to next team in order
 			team: newTeams[Math.floor(participant % numTeams)],
 			turn: participant,
-			// Deal them a hand
 			cards: dealHand(newDeck, handSize),
 			currentCard: undefined
 		};
@@ -189,19 +170,15 @@ function createMatch(participants) {
 		participants[participant].socket.emit("update cards", playerObject.cards);
 	}
 
-	// Overwrite players
 	players = newPlayers;
 
-	// Make new match
 	var match = {
 		matchId: id,
 		deck: newDeck,
 		round: createRound(0, newDeck),
 		players: newPlayers,
 		teams: newTeams,
-		isOver: false,
-		// timerActive: false,
-		// timer: timerDuration
+		isOver: false
 	};
 
 	for (var z = 0;  z < participants.length; z++){
@@ -209,11 +186,9 @@ function createMatch(participants) {
 	}
 
 	matches.push(match);
-	console.log('players: ', players);
 	for (var x = 0; x < players.length; x++) {
 		players[x].socket.emit("enter match", players[x].team);
 	}
-	// match.timerActive = true;
 
 	callBet(match);
 }
@@ -299,6 +274,7 @@ function dealHand(deck, numCards) {
  */
 function drawCard(deck) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	return deck.shift();
 }
 
@@ -329,6 +305,7 @@ function shuffleDeck(deck) {
  */
 function findMatchBySocketId(socketId) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	for (var i = 0; i < matches.length; i++) {
 		for (var j = 0; j < matches[i].players.length; j++) {
 			if (matches[i].players[j].socket.id === socketId) {
@@ -345,6 +322,8 @@ function findMatchBySocketId(socketId) {
  * @param match 
  */
 function callBet(match) {
+	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	var turn = match.round.turnToBet;
 	console.log("turn to bet: ", turn);
 	if (turn < match.round.currentBetters.length && match.round.currentBetters.length != 1) {
@@ -365,7 +344,8 @@ function callBet(match) {
 }
 
 function handleBet(socket, bet) {
-	console.log('socket bets', bet);
+	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
 	var match = findMatchBySocketId(socket.id);
 	var player = findPlayerById(socket.id);
 	if (bet > match.round.bet) {
@@ -380,16 +360,11 @@ function handleBet(socket, bet) {
 }
 
 function handlePass(socket) {
-	console.log('socket passes');
+	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
 	var match = findMatchBySocketId(socket.id);
 	var player = findPlayerById(socket.id);
-
-	console.log('Before splice ', match.players.length)
 	match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);
-	console.log('After splice ', match.players.length)
-	
-	// keep turns the same
-	// match.round.turnToBet = match.round.turnToBet
 	callBet(match);
 }
 
@@ -400,12 +375,9 @@ function startRound(match) {
 			match.round.roundBetter.socket.emit('choose cards', match.round.pot);
 		}
 		else {
-			console.log('in here calling wait ', match.players[i].socket)
-
 			match.players[i].socket.emit('waiting on bet winner to choose cards')
 		}
 	}
-	// handleTurn(match);
 }
 
 /**
@@ -418,47 +390,35 @@ function playCard(socket, index) {
 	
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
+		for (var z = 0;  z < match.players.length; z++){
+			console.log("PlayerCARD : ", match.players[z].cards);
+		}
 
-	for (var z = 0;  z < match.players.length; z++){
-		console.log("PlayerCARD : ", match.players[z].cards);
-	}
-	console.log("SOCKEt id ", socket.id);
 		var player = findPlayerById(socket.id);
 		
-		if (!player.currentCard) {
-			console.log("Player cards: ", player.cards);
-			if (index >= 0 && index < player.cards.length) {
-				if (player.cards[index] !== undefined) {
-					// player.currentCard = player.cards[index];
-					// player.cards[index] = undefined;
+		if (!player.currentCard && index >= 0 && index < player.cards.length
+			 && player.cards[index] !== undefined && player.turn == match.round.ciruit.turnToPlay) {
+				
+			player.currentCard = player.cards[index];
+			player.cards[index] = undefined;
 
-					if (player.turn == match.round.ciruit.turnToPlay) {
-						player.currentCard = player.cards[index];
-						player.cards[index] = undefined;
-
-						// match.timerActive = false;
-						// match.timer = timerDuration;
-
-						if (match.round.circuit.turnToPlay === 0 || fightCards(match, player.currentCard)) {
-							match.round.circuit.bestCard = player.currentCard;
-							match.round.circuit.currentLeader = player.team;
-						}
-
-						match.round.circuit.cardPile.push(player.currentCard);
-
-						match.round.circuit.turn++;
-
-						handleTurn(match);
-					}
-				}
+			if (match.round.circuit.turnToPlay === 0 || fightCards(match, player.currentCard)) {
+				match.round.circuit.bestCard = player.currentCard;
+				match.round.circuit.currentLeader = player.team;
 			}
+
+			match.round.circuit.cardPile.push(player.currentCard);
+
+			match.round.circuit.turn++;
+
+			handleTurn(match);
 		}
 	}
 }
 
 function handleTurn(match) {
 	var turn = match.round.turn;
-	console.log("turn: ", turn);
+
 	if (turn < match.players.length) {
 		match.players[turn].socket.emit("turn play on");
 	}
@@ -579,6 +539,7 @@ function processRound(match) {
  */
 function nextRound(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	for (var i = 0; i < match.players.length; i++) {
 		match.players[i].currentCard = undefined;
 		for (var j = 0; j < match.players[i].cards.length; j++) {
@@ -596,6 +557,7 @@ function nextRound(match) {
 
 function checkForSet(player) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	for (var i = 0; i < player.points.length; i++) {
 		var setColors = [];
 		for (var j = 0; j < player.points[i].length; j++) {
@@ -646,10 +608,7 @@ function quitMatch(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	io.to(match.matchId).emit("quit match", "player left");
-	
 	match.isOver = true;
-	// match.timer = timerDuration;
-	// match.timerActive = false;
 }
 
 /**
@@ -662,10 +621,7 @@ function endMatch(match, winningTeam, reason) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	io.to(match.matchId).emit("end match", winningTeam, reason);
-	
 	match.isOver = true;
-	// match.timer = timerDuration;
-	// match.timerActive = false;
 }
 
 /**
@@ -691,7 +647,6 @@ function updateCardsRequested(socket) {
 	if (match) {
 		var player = findPlayerById( socket.id);
 		player.socket.emit("update cards", player.cards);
-		// match.timerActive = true;
 	}
 }
 
@@ -702,59 +657,13 @@ function updateCardsRequested(socket) {
 function rematchRequested(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	// Find this players match
 	var match = findMatchBySocketId(socket.id);
 
-	// If match exits
 	if (match) {
 		match.rematch += 1;
-
-		// If the match has a requested rematch and 
 		if (match.rematch == match.players.length) {
 			removeMatch(match);
 			createMatch(match.players);
 		}
 	}
 } 
-
-// /**
-//  * Updates the timers for each active match
-//  */
-// function updateTimers() {
-// 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-// 	for (var i = 0; i < matches.length; i++) {
-// 		if (matches[i].timerActive) {
-// 			matches[i].timer -= 1;
-// 			if (matches[i].timer === 0) {
-// 				console.log('times up');
-// 				timesup(matches[i]);
-// 			}
-// 		}
-// 	}
-// 	setTimeout(updateTimers, 1000);
-// }
-
-// /**
-//  * Handles what to do when a match's time is up
-//  * @param match 	The match that's time is up
-//  */
-// function timesup(match) {
-// 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-// 	match.timerActive = false;
-// 	match.timer = timerDuration;
-// 	if (match.players[0].currentCard) {
-// 		if (match.players[1].currentCard) {
-// 			fightCards(match);
-// 		} else {
-// 			processRound(match, false, match.players[0]);
-// 		}
-// 	} else {
-// 		if (match.players[1].currentCard) {
-// 			processRound(match, false, match.players[1]);
-// 		} else {
-// 			processRound(match, true, match.players[0]);
-// 		}
-// 	}
-// }

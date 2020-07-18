@@ -58,7 +58,6 @@ function init() {
 	labels["rematch"] = new Label({x: 0.5, y: 0.62}, "Rematch", 128, false, false, false, secondaryFont, requestRematch);
 	labels["waiting"] = new Label({x: 0.5, y: 0.62}, "Waiting   ", 128, false, false, false, secondaryFont);
 	labels["main menu"] = new Label({x: 0.5, y: 0.78}, "Main Menu", 128, false, false, false, secondaryFont, exitMatch);
-	// labels["timer"] = new Label({x: 0.5, y: 0.1}, 60, 64, false, false, false, secondaryFont);
 	labels["currentBet"] = new Label({x: 0.5, y: 0.1}, "Current Bet: 0", 128, false, false, false, secondaryFont);
 	labels["bet"] = new Label({x: 0.25, y: 0.3}, "Bet", 98, false, true, false, secondaryFont, handleBet);
 	labels["pass"] = new Label({x: 0.75, y: 0.3}, "Pass", 98, false, true, false, secondaryFont, handlePass);
@@ -166,7 +165,6 @@ function handleMouseUp(event) {
 
 	for (var i = 0; i < chooseSlots.length; i++) {
 		if (isOnSlot(event, chooseSlots[i]) && canChooseCard) {
-			// chooseCard(i);
 			var temp = playerCard;
 			playerCard = chooseSlots[i].card;
 			chooseSlots[i].card = temp;
@@ -290,7 +288,6 @@ function drawCard(card, position, scale) {
 
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
-	// console.log("ctx.fillStyle = toColor(", card.color, ")");
 	ctx.fillStyle = toColor(card.color);
 	ctx.fillRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
 	ctx.strokeStyle = "#000000";
@@ -298,7 +295,6 @@ function drawCard(card, position, scale) {
 	ctx.strokeRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
 	ctx.fillStyle = "#ffffff";
 	ctx.fillRect(position.x + cardWidth * scale * 0.1, position.y + cardHeight * scale * 0.067, cardWidth * scale * 0.8, cardHeight * scale * 0.866);
-	// console.log("ctx.fillStyle = toColor(", card.color, ")");
 
 	ctx.fillStyle = toColor(card.color);
 	ctx.font = "bold " + (50 * scale * r) + "px Arial";
@@ -409,9 +405,6 @@ var clickCursor = false,
 	labels = [],
 	primaryFont = "rook-primary";
 	secondaryFont = "Arial";
-// var typeColors = ["#FF8B26", "#1260E6", "#74D5F2"];
-// var types = ["Fire", "Water", "Ice"];
-// var colors = {"yellow": "#fdee00", "orange": "#ffb235", "green": "#52a546", "blue": "#246acd", "red": "#e02929", "purple": "#9738af"};
 
 init();
 animate();

@@ -8,7 +8,7 @@ var canChooseCards = false;
 var logFull = false;
 var playerPoints = [],
 	opponentPoints = [];
-var opponentCard, playerCard, winningTeam, matchEndReason, readyToEnd; // timerInterval;
+var opponentCard, playerCard, winningTeam, matchEndReason, readyToEnd;
 var currentBet = 0;
 var betIncrements = 5;
 
@@ -281,9 +281,6 @@ function quitMatch() {
 	labels["rematch"].visible = true;
 	labels["main menu"].visible = true;
 	labels["main menu"].clickable = true;
-	// labels["timer"].visible = false;
-	// labels["timer"].text = turnTimer;
-	// clearInterval(timerInterval);
 	winningTeam = undefined;
 	matchEndReason = undefined;
 }
@@ -305,9 +302,6 @@ function endMatch() {
 	labels["rematch"].visible = true;
 	labels["main menu"].visible = true;
 	labels["main menu"].clickable = true;
-	// labels["timer"].visible = false;
-	// labels["timer"].text = turnTimer;
-	// clearInterval(timerInterval);
 	winningTeam = undefined;
 	matchEndReason = undefined;
 }
