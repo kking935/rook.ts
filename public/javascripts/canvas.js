@@ -51,21 +51,21 @@ function init() {
 		})
 	}
 
-	labels["logo"] = new Label({x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, "Arial");
-	labels["play"] = new Label({x: 0.5, y: 0.7}, "Play!", 144, true, true, false, labelFont, enterQueue);
-	labels["searching"] = new Label({x: 0.5, y: 0.7}, "Searching   ", 144, false, false, false, labelFont);
-	labels["result"] = new Label({x: 0.5, y: 0.3}, "", 192, false, false, false, labelFont);
-	labels["rematch"] = new Label({x: 0.5, y: 0.62}, "Rematch", 128, false, false, false, labelFont, requestRematch);
-	labels["waiting"] = new Label({x: 0.5, y: 0.62}, "Waiting   ", 128, false, false, false, labelFont);
-	labels["main menu"] = new Label({x: 0.5, y: 0.78}, "Main Menu", 128, false, false, false, labelFont, exitMatch);
-	// labels["timer"] = new Label({x: 0.5, y: 0.1}, 60, 64, false, false, false, labelFont);
-	labels["currentBet"] = new Label({x: 0.5, y: 0.1}, "Current Bet: 0", 128, false, false, false, labelFont);
-	labels["bet"] = new Label({x: 0.25, y: 0.3}, "Bet", 98, false, true, false, labelFont, handleBet);
-	labels["pass"] = new Label({x: 0.75, y: 0.3}, "Pass", 98, false, true, false, labelFont, handlePass);
-	labels["betting"] = new Label({x: 0.5, y: 0.4}, "Waiting for other players to bet   ", 65, false, false, false, labelFont);
-	labels["chooseCards"] = new Label({x: 0.5, y: 0.1}, "Choose which cards to discard   ", 65, false, false, false, labelFont);
-	labels["playerChoosingCards"] = new Label({x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
-	labels["playerChoosingTrumps"] = new Label({x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, labelFont);
+	labels["logo"] = new Label({x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, primaryFont);
+	labels["play"] = new Label({x: 0.5, y: 0.7}, "Play!", 144, true, true, false, secondaryFont, enterQueue);
+	labels["searching"] = new Label({x: 0.5, y: 0.7}, "Searching   ", 144, false, false, false, secondaryFont);
+	labels["result"] = new Label({x: 0.5, y: 0.3}, "", 192, false, false, false, secondaryFont);
+	labels["rematch"] = new Label({x: 0.5, y: 0.62}, "Rematch", 128, false, false, false, secondaryFont, requestRematch);
+	labels["waiting"] = new Label({x: 0.5, y: 0.62}, "Waiting   ", 128, false, false, false, secondaryFont);
+	labels["main menu"] = new Label({x: 0.5, y: 0.78}, "Main Menu", 128, false, false, false, secondaryFont, exitMatch);
+	// labels["timer"] = new Label({x: 0.5, y: 0.1}, 60, 64, false, false, false, secondaryFont);
+	labels["currentBet"] = new Label({x: 0.5, y: 0.1}, "Current Bet: 0", 128, false, false, false, secondaryFont);
+	labels["bet"] = new Label({x: 0.25, y: 0.3}, "Bet", 98, false, true, false, secondaryFont, handleBet);
+	labels["pass"] = new Label({x: 0.75, y: 0.3}, "Pass", 98, false, true, false, secondaryFont, handlePass);
+	labels["betting"] = new Label({x: 0.5, y: 0.4}, "Waiting for other players to bet   ", 65, false, false, false, secondaryFont);
+	labels["chooseCards"] = new Label({x: 0.5, y: 0.1}, "Choose which cards to discard   ", 65, false, false, false, secondaryFont);
+	labels["playerChoosingCards"] = new Label({x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, secondaryFont);
+	labels["playerChoosingTrumps"] = new Label({x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, secondaryFont);
 }
 
 function animate() {
@@ -341,7 +341,7 @@ function drawUnknownCard(position, scale) {
 	ctx.fillStyle = "#a0a0a0";
 	ctx.fillRect(position.x + cardWidth * scale * 0.1, position.y + cardHeight * scale * 0.067, cardWidth * scale * 0.8, cardHeight * scale * 0.866);
 	ctx.fillStyle = "#d1d1d1";
-	ctx.font = "bold " + (72 * r * scale) + "px " + labelFont;
+	ctx.font = "bold " + (72 * r * scale) + "px " + secondaryFont;
 	ctx.fillText("?", position.x + cardWidth * scale / 2, position.y + cardHeight * 0.5 * scale);
 }
 
@@ -407,7 +407,8 @@ var clickCursor = false,
 	displayChooseSlots = false,
 	aspect = 16 / 10,
 	labels = [],
-	labelFont = "RagingRedLotusBB";
+	primaryFont = "rook-primary";
+	secondaryFont = "Arial";
 // var typeColors = ["#FF8B26", "#1260E6", "#74D5F2"];
 // var types = ["Fire", "Water", "Ice"];
 // var colors = {"yellow": "#fdee00", "orange": "#ffb235", "green": "#52a546", "blue": "#246acd", "red": "#e02929", "purple": "#9738af"};
