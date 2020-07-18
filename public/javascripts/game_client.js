@@ -12,9 +12,6 @@ var opponentCard, playerCard, winningTeam, matchEndReason, readyToEnd; // timerI
 var currentBet = 0;
 var betIncrements = 5;
 
-// Set the countdown timer
-// const turnTimer = 60;
-
 //////////  Socket Events  \\\\\\\\\\
 socket.on("enter match", function(team) {
 	enterMatch(team);
@@ -96,6 +93,7 @@ socket.on("no rematch", function() {
 //////////  Functions  \\\\\\\\\\
 function enterQueue() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	socket.emit("enter queue");
 	labels["play"].visible = false;
 	labels["play"].clickable = false;
@@ -104,6 +102,7 @@ function enterQueue() {
 
 function enterMatch(newTeam) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	team = newTeam;
 	playerPoints = [];
 	opponentPoints = [];
@@ -114,15 +113,8 @@ function enterMatch(newTeam) {
 	labels["rematch"].clickable = false;
 	labels["rematch"].disabled = false;
 	labels["waiting"].visible = false;
-	// labels["timer"].text = turnTimer;
-	// labels["timer"].visible = true;
-	// timerInterval = setInternval(updateTimer, 1000);
-	// labels["timer"].visible = false;
-
-
 	labels["currentBet"].visible = true;
 	labels["betting"].visible = true;
-
 
 	resetDots(labels["waiting"]);
 	labels["searching"].visible = false;
@@ -142,7 +134,6 @@ function updateCards(cards) {
 function updateCurrentBet(newBet, bettingTeamId) {
 	currentBet = newBet;
 	labels["currentBet"].text = "Current Bet: " + currentBet;
-
 	labels["currentBet"].color1 = "#0f0f0f";
 
 	if (team.id === bettingTeamId) {
@@ -155,6 +146,7 @@ function updateCurrentBet(newBet, bettingTeamId) {
 
 function updateChooseCards(cards) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	console.log('choose cards: ', cards);
 	for (var i = 0; i < cards.length; i++) {
 		chooseSlots[i].card = cards[i];
@@ -164,15 +156,11 @@ function updateChooseCards(cards) {
 }
 
 function turnOnPlay(){
-	// labels["timer"].text = turnTimer;
-	// labels["timer"].visible = true;
-	// timerInterval = setInterval(updateTimer, 1000);
 	canPlayCard = true;
 }
 
 function turnOnBet(){
 	labels["betting"].visible = false;
-
 	labels["currentBet"].visible = true;
 	labels["bet"].visible = true;
 	labels["pass"].visible = true;
@@ -194,12 +182,12 @@ function doneChoosingCards() {
 }
 
 function turnOffPlay(){
-	// labels["timer"].visible = false;
 	canPlayCard = false;
 }
 
 function handleBet() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	if (canBet) {
 		var newBet = currentBet + betIncrements;
 		labels["currentBet"].text = 'Current Bet: ' + newBet;
@@ -211,6 +199,7 @@ function handleBet() {
 
 function handlePass() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	if (canBet) {
 		socket.emit("pass");
 		labels["betting"].visible = true;
@@ -220,6 +209,7 @@ function handlePass() {
 
 function playCard(index) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	if (canPlayCard) {
 		socket.emit("play card", index);
 		turnOffPlay();
@@ -228,6 +218,7 @@ function playCard(index) {
 
 function unknownCardPlayed() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	opponentCard = {isUnknown: true};
 }
 
@@ -245,7 +236,6 @@ function displayResult(result) {
 	playerPoints = player.points;
 	opponentPoints = opponent.points;
 	opponentCard = opponent.card;
-	// clearInterval(timerInterval);
 	setTimeout(function() {
 		if (readyToEnd) {
 			endMatch();
@@ -253,8 +243,6 @@ function displayResult(result) {
 			canPlayCard = true;
 			opponentCard = undefined;
 			playerCard = undefined;
-			// labels["timer"].text = turnTimer;
-			// timerInterval = setInterval(updateTimer, 1000);
 			canPlayCard = true;
 			socket.emit("request cards update");
 		}
@@ -287,7 +275,6 @@ function quitMatch() {
 
 	labels["rematch"].disabled = true;
 	labels["rematch"].clickable = false;
-
 	labels["result"].text = "A Player Disconnected";
 	labels["result"].size = 90;
 	labels["result"].visible = true;
@@ -327,6 +314,7 @@ function endMatch() {
 
 function exitMatch() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	playerPoints = [];
 	opponentPoints = [];
 	socket.emit("leave match");
@@ -345,6 +333,7 @@ function exitMatch() {
 
 function requestRematch() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	socket.emit("request rematch");
 	labels["rematch"].visible = false;
 	labels["rematch"].clickable = false;
@@ -369,13 +358,3 @@ function updateDots(label) {
 function resetDots(label) {
 	label.text = label.text.slice(0, -3) + "...";
 }
-
-// function updateTimer() {
-// 	labels["timer"].text -= 1;
-// 	if (labels["timer"].text === 0) {
-// 		canPlayCard = false;
-// 		clearInterval(timerInterval);
-// 		playCard(0);
-// 		turnOffPlay();
-// 	}
-// }
