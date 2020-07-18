@@ -4,8 +4,12 @@
 var handSize = 10;
 var potSize = 5;
 
+var primaryColor = "#9a9a9a";
+var secondaryColor = "#000000";
+
+
 //////////  Constructors  \\\\\\\\\\
-function Label(position, text, size, visible, clickable, disabled, font, callback) {
+function Label(color1, color2, position, text, size, visible, clickable, disabled, font, callback) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	// x and y are integers betweem 0 and 1. Use as percentages.
 	this.position = position;
@@ -17,8 +21,8 @@ function Label(position, text, size, visible, clickable, disabled, font, callbac
 	this.down = false;
 	this.font = font;
 	this.callback = callback;
-	this.color1 = "#9a9a9a"
-	this.color2 = "#000000";
+	this.color1 = color1;
+	this.color2 = color2;
 }
 
 //////////  Canvas  \\\\\\\\\\
@@ -33,39 +37,41 @@ function init() {
 
 	for (var i = 0; i < handSize; i++) {
 		handSlots.push({
-			position: {
-				x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
-				y: canvas.height - cardHeight * 1.1
-			},
+			position: undefined,
 			card: undefined
 		});
 	}
 
 	for (var x = 0; x < potSize; x++) {
 		chooseSlots.push({
-			position: {
-				x: canvas.width * 0.05 + canvas.width / handSize * i - cardWidth / 2,
-				y: canvas.height - cardHeight * 1.1
-			},
+			position: undefined,
 			card: undefined
 		})
 	}
 
-	labels["logo"] = new Label({x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, "Arial");
-	labels["play"] = new Label({x: 0.5, y: 0.7}, "Play!", 144, true, true, false, labelFont, enterQueue);
-	labels["searching"] = new Label({x: 0.5, y: 0.7}, "Searching   ", 144, false, false, false, labelFont);
-	labels["result"] = new Label({x: 0.5, y: 0.3}, "", 192, false, false, false, labelFont);
-	labels["rematch"] = new Label({x: 0.5, y: 0.62}, "Rematch", 128, false, false, false, labelFont, requestRematch);
-	labels["waiting"] = new Label({x: 0.5, y: 0.62}, "Waiting   ", 128, false, false, false, labelFont);
-	labels["main menu"] = new Label({x: 0.5, y: 0.78}, "Main Menu", 128, false, false, false, labelFont, exitMatch);
-	// labels["timer"] = new Label({x: 0.5, y: 0.1}, 60, 64, false, false, false, labelFont);
-	labels["currentBet"] = new Label({x: 0.5, y: 0.1}, "Current Bet: 0", 128, false, false, false, labelFont);
-	labels["bet"] = new Label({x: 0.25, y: 0.3}, "Bet", 98, false, true, false, labelFont, handleBet);
-	labels["pass"] = new Label({x: 0.75, y: 0.3}, "Pass", 98, false, true, false, labelFont, handlePass);
-	labels["betting"] = new Label({x: 0.5, y: 0.4}, "Waiting for other players to bet   ", 65, false, false, false, labelFont);
-	labels["chooseCards"] = new Label({x: 0.5, y: 0.1}, "Choose which cards to discard   ", 65, false, false, false, labelFont);
-	labels["playerChoosingCards"] = new Label({x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
-	labels["playerChoosingTrumps"] = new Label({x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, labelFont);
+	labels["logo"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, "Arial");
+	labels["play"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.7}, "Play!", 144, true, true, false, labelFont, enterQueue);
+	labels["searching"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.7}, "Searching   ", 144, false, false, false, labelFont);
+	labels["result"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.3}, "", 192, false, false, false, labelFont);
+	labels["rematch"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.62}, "Rematch", 128, false, false, false, labelFont, requestRematch);
+	labels["waiting"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.62}, "Waiting   ", 128, false, false, false, labelFont);
+	labels["main menu"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.78}, "Main Menu", 128, false, false, false, labelFont, exitMatch);
+	labels["currentBet"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Current Bet: 0", 100, false, false, false, labelFont);
+	labels["bet"] = new Label(secondaryColor, toColor("green"), {x: 0.875, y: 0.45}, "Bet", 70, false, true, false, labelFont, handleBet);
+	labels["pass"] = new Label(secondaryColor, toColor("ROOK"), {x: 0.125, y: 0.45}, "Pass", 70, false, true, false, labelFont, handlePass);
+	labels["betting"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.25}, "Waiting for other players to bet   ", 50, false, false, false, labelFont);
+	labels["chooseCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Choose which cards to discard   ", 50, false, false, false, labelFont);
+	labels["playerChoosingCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
+	labels["playerChoosingTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, labelFont);
+
+	console.log('before')
+	labels["chooseTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Choose trumps color   ", 50, false, true, false, labelFont);
+	labels["red"] = new Label(secondaryColor, toColor("red"), {x: 0.2, y: 0.5}, "Red", 50, false, true, false, labelFont, chooseRedTrumps);
+	labels["blue"] = new Label(secondaryColor, toColor("blue"), {x: 0.4, y: 0.5}, "Blue", 50, false, true, false, labelFont, chooseBlueTrumps);
+	labels["green"] = new Label(secondaryColor, toColor("green"), {x: 0.6, y: 0.5}, "Green", 50, false, true, false, labelFont, chooseGreenTrumps);
+	labels["black"] = new Label(secondaryColor, toColor("black"), {x: 0.8, y: 0.5}, "Black", 50, false, true, false, labelFont, chooseBlackTrumps);
+
+	labels["trumps"] = new Label(secondaryColor, secondaryColor, {x: 0.9, y: 0.1}, "", 30, false, false, false, labelFont);
 }
 
 function animate() {
@@ -166,7 +172,6 @@ function handleMouseUp(event) {
 
 	for (var i = 0; i < chooseSlots.length; i++) {
 		if (isOnSlot(event, chooseSlots[i]) && canChooseCard) {
-			// chooseCard(i);
 			var temp = playerCard;
 			playerCard = chooseSlots[i].card;
 			chooseSlots[i].card = temp;
@@ -175,7 +180,6 @@ function handleMouseUp(event) {
 	}
 	handleMouseMove(event);
 }
-
 function isOnSlot(event, slot) {
 	var x = (event.pageX - canvas.offsetLeft),
 		y = (event.pageY - canvas.offsetTop);
@@ -230,11 +234,11 @@ function handleResize() {
 	}
 
 	if (chooseSlots) {
-		console.log('resizing chooseSLots');
-		for (var i = 0; i < potSize; i++) {
+		console.log('resizing chooseSLots',chooseSlots.length);
+		for (var i = 0; i < chooseSlots.length; i++) {
 			chooseSlots[i].position = {
 				x: canvas.width * 0.3 + canvas.width / handSize * i - cardWidth / 2,
-				y: canvas.height - cardHeight * 1.1 * 3
+				y: canvas.height * 0.35
 			};
 		}
 	}
@@ -246,23 +250,20 @@ function handleResize() {
 //////////  Drawing  \\\\\\\\\\
 function draw() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	for (var i = 0; i < handSlots.length; i++) {
-		if (displayCardSlots) {
-			if (handSlots[i].card) {
-				drawCard(handSlots[i].card, handSlots[i].position, 1);
-			} else {
-				drawEmptySlot(handSlots[i]);
-			}
+	if (displayCardSlots) {
+		for (var i = 0; i < handSlots.length; i++) {
+			drawCard(handSlots[i].card, handSlots[i].position, 1);
 		}
 	}
 
-	for (var x = 0; x < chooseSlots.length; x++) {
-		if (displayChooseSlots) {
-			if (chooseSlots[x].card) {
+	if (displayChooseSlots) {
+		for (var x = 0; x < chooseSlots.length; x++) {
+			if (canChooseCards) {
 				drawCard(chooseSlots[x].card, chooseSlots[x].position, 1)
 			}
 			else {
-				drawEmptySlot(chooseSlots[i]);
+				console.log(chooseSlots[x]);
+				drawUnknownCard(chooseSlots[x].position, 1);
 			}
 		}
 	}
@@ -290,7 +291,6 @@ function drawCard(card, position, scale) {
 
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
-	// console.log("ctx.fillStyle = toColor(", card.color, ")");
 	ctx.fillStyle = toColor(card.color);
 	ctx.fillRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
 	ctx.strokeStyle = "#000000";
@@ -298,8 +298,6 @@ function drawCard(card, position, scale) {
 	ctx.strokeRect(position.x, position.y, cardWidth * scale, cardHeight * scale);
 	ctx.fillStyle = "#ffffff";
 	ctx.fillRect(position.x + cardWidth * scale * 0.1, position.y + cardHeight * scale * 0.067, cardWidth * scale * 0.8, cardHeight * scale * 0.866);
-	// console.log("ctx.fillStyle = toColor(", card.color, ")");
-
 	ctx.fillStyle = toColor(card.color);
 	ctx.font = "bold " + (50 * scale * r) + "px Arial";
 	ctx.fillText(card.number, position.x + cardWidth * scale / 2, position.y + cardHeight * scale * 0.4);
@@ -386,8 +384,24 @@ function drawLabel(label) {
 	}
 }
 
-function chooseTrumps() {
-	// TODO: Implement this
+function chooseRedTrumps() {
+	chooseTrumps("red")
+}
+
+function chooseBlueTrumps() {
+	chooseTrumps("blue")
+}
+
+function chooseBlackTrumps() {
+	chooseTrumps("black")
+}
+
+function chooseGreenTrumps() {
+	chooseTrumps("green")
+}
+
+function chooseTrumps(newTrumps) {
+	socket.emit("set trumps", newTrumps);
 }
 //////////  Initialize  \\\\\\\\\\
 window.requestAnimFrame = (function () {
@@ -408,9 +422,6 @@ var clickCursor = false,
 	aspect = 16 / 10,
 	labels = [],
 	labelFont = "RagingRedLotusBB";
-// var typeColors = ["#FF8B26", "#1260E6", "#74D5F2"];
-// var types = ["Fire", "Water", "Ice"];
-// var colors = {"yellow": "#fdee00", "orange": "#ffb235", "green": "#52a546", "blue": "#246acd", "red": "#e02929", "purple": "#9738af"};
 
 init();
 animate();
