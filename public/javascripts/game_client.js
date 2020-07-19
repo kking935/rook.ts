@@ -1,16 +1,26 @@
 // This file manages the games client's logic. It's here that Socket.io connections are handled
 // and functions from canvas.js are used to manage the game's visual appearance.
 
+// Ignore
 var socket = io();
-var canPlayCard = false;
-var canBet = false;
-var canChooseCards = false;
 var logFull = false;
-var playerPoints = [],
-	opponentPoints = [];
+
+// State variables
+// ----------------
+// For betting: 
+var canBet = false;
+
+// For choosing cards from pot:
+var canChooseCards = false;
+
+// For playing card:
+var canPlayCard = false;
+
 var opponentCard, playerCard, winningTeam, matchEndReason, readyToEnd;
 var currentBet = 0;
 var betIncrements = 5;
+
+var activeLabels = [];
 
 //////////  Socket Events  \\\\\\\\\\
 socket.on("update cards", function(cards) {
@@ -21,69 +31,46 @@ socket.on("enter match", function(team, cards) {
 	enterMatch(team);
 });
 
-socket.on("update choose cards", function(cards) {
-	updateChooseCards(cards);
-});
-
-socket.on("turn play on", function() {
-	turnOnPlay();
-});
+socket.on("update current bet", function(newBet, bettingTeamId) {
+	updateCurrentBet(newBet, bettingTeamId);
+})
 
 socket.on("turn on bet", function() {
 	turnOnBet();
 });
 
-socket.on("turn off bet", function() {
-	labels["currentBet"].visible = false;
-	labels["betting"].visible = false;
-	turnOffBet();
+socket.on("end betting", function() {
+	endBet()
 });
 
-socket.on("update current bet", function(newBet, bettingTeamId) {
-	updateCurrentBet(newBet, bettingTeamId);
+socket.on("turn on choose cards", function() {
+	turnOnChooseSlots();
 })
 
-socket.on("choose cards", function() {
-	labels["chooseCards"].visible = true;
-	canChooseCards = true;
-	labels["submitCards"].visible = true;
-	labels["submitCards"].clickable = true;
-})
+socket.on("update choose cards", function(cards) {
+	updateChooseCards(cards);
+});
 
-socket.on("choose trumps", function() {
-	labels["chooseTrumps"].visible = true;
-	labels["submitTrumps"].visible = true;
-	labels["submitTrumps"].clickable = true;
-
-	labels["red"].visible = true;
-	labels["green"].visible = true;
-	labels["blue"].visible = true;
-	labels["black"].visible = true;
-
-	labels["red"].clickable = true;
-	labels["green"].clickable = true;
-	labels["blue"].clickable = true;
-	labels["black"].clickable = true;
+socket.on("turn on choose trumps", function() {
+	turnOnChooseTrumps()
 })
 
 socket.on("set trumps", function(newTrumps) {
-	// display new trumps value
-	labels["trumps"].text = 'Trumps: ' + newTrumps;
-	labels["trumps"].color2 = toColor(newTrumps);
-	labels["trumps"].visible = true;
+	setTrumps(newTrumps)
 })
 
+socket.on("turn play on", function() {
+	turnOnPlay();
+});
+
 socket.on("waiting on bet winner to choose cards", function() {
-	labels["playerChoosingCards"].visible = true;
+	turnOnLabels(["playerChoosingCards"])
 })
 
 socket.on("waiting on bet winner to choose trumps", function() {
-	console.log('here')
-	chooseSlots = [];
-	displayChooseSlots = false;
-
-	labels["playerChoosingCards"].visible = false;
-	labels["playerChoosingTrumps"].visible = true;
+	turnOffChooseSlots();
+	turnOffLabels(["playerChoosingCards"])
+	turnOnLabels(["playerChoosingTrumps"])
 })
 
 socket.on("unknown card played", function() {
@@ -99,12 +86,11 @@ socket.on("round winners", function(winningTeam) {
 	displayRoundResult(winningTeam);
 })
 
-socket.on("quit match", function(reason) {
+socket.on("abbort match", function(reason) {
 	matchEndReason = reason;
 	readyToEnd = true;
-	quitMatch();	
+	abbortMatch();	
 });
-
 
 socket.on("end match", function(winners, reason) {
 	winningTeam = winners;
@@ -114,11 +100,9 @@ socket.on("end match", function(winners, reason) {
 });
 
 socket.on("no rematch", function() {
-	if (labels["waiting"].visiblen || labels["rematch"].visible) {
-		labels["waiting"].visible = false;
-		labels["rematch"].disabled = true;
-		labels["rematch"].clickable = false;
-		labels["rematch"].visible = true;
+	if (labels["waiting"].visible || labels["rematch"].visible) {
+		turnOffLabels(["waiting"])
+		disableLabels(["rematch"])
 	}
 });
 
@@ -127,9 +111,8 @@ function enterQueue() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	socket.emit("enter queue");
-	labels["play"].visible = false;
-	labels["play"].clickable = false;
-	labels["searching"].visible = true;
+	turnOffLabels(["play"])
+	turnOnLabels(["searching"])
 }
 
 function enterMatch(newTeam) {
@@ -137,34 +120,79 @@ function enterMatch(newTeam) {
 	
 	team = newTeam;
 	playerPoints = [];
-	opponentPoints = [];
-	labels["result"].visible = false;
-	labels["main menu"].visible = false;
-	labels["main menu"].clickable = false;
-	labels["rematch"].visible = false;
-	labels["rematch"].clickable = false;
-	labels["rematch"].disabled = false;
-	labels["waiting"].visible = false;
-	labels["currentBet"].visible = true;
-	labels["betting"].visible = true;
-	labels["logo"].visible = false;
-	labels["searching"].visible = false;
+
+	turnOffLabels(["searching", "logo"]);
+	turnOnLabels(["currentBet", "betting"])
 }
 
 function updateCards(cards) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
+	handSlots = [cards.length];
+
 	for (var i = 0; i < cards.length; i++) {
-		handSlots[i].card = cards[i];
+		cards[i].position = {
+			x: handSlotsX,
+			y: handSlotsY
+		}
+		handSlots[i] = cards[i];
 	}
 	displayCardSlots = true;
 
+	handleResize();
 }
+
+function turnOnBet(){
+	turnOffLabels(["betting"]);
+	turnOnClickableLabels(["bet", "pass"])
+	canBet = true;
+}
+
+function turnOffBet(){
+	turnOnLabels(['betting'])
+	turnOffLabels(["bet", "pass"])
+	canBet = false;
+}
+
+function endBet() {
+	console.log('\n\nending betting')
+	turnOffLabels(['betting', 'bet', 'pass', 'currentBet'])
+	canBet = false;
+}
+
+function handleBet() {
+	 //  // if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
+	if (canBet) {
+		var newBet = currentBet + betIncrements;
+		labels["currentBet"].text = 'Current Bet: ' + newBet;
+		
+		socket.emit("bet", newBet);
+		turnOffBet()
+	}
+}
+
+function handlePass() {
+	//  // if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+   
+   if (canBet) {
+	   socket.emit("pass");
+	   turnOnLabels(['betting'])
+	   turnOffLabels(['bet', 'pass'])
+   }
+}
+
 function updateChooseCards(cards) {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
+	chooseSlots = [cards.length];
+
 	for (var i = 0; i < cards.length; i++) {
-		chooseSlots[i].card = cards[i];
+		[i].position = {
+			x: chooseSlotsX,
+			y: chooseSlotsY
+		}
+		chooseSlots[i] = cards[i];
 	}
 
 	displayChooseSlots = true;
@@ -172,80 +200,52 @@ function updateChooseCards(cards) {
 	handleResize();
 }
 
-function updateCurrentBet(newBet, bettingTeamId) {
-	currentBet = newBet;
-	labels["currentBet"].text = "Current Bet: " + currentBet;
-	labels["currentBet"].color1 = "#0f0f0f";
+function turnOnChooseSlots(){
+	turnOnLabels(['chooseCards'])
+	turnOnClickableLabels(['submitCards'])
+	canChooseCards = true;
+}
 
-	if (team.id === bettingTeamId) {
-		labels["currentBet"].color2 = "#52a546";
-	}
-	else {
-		labels["currentBet"].color2 = "#e02929";
-	}
+function turnOffChooseSlots() {
+	turnOffLabels(["submitCards", "chooseCards"])
+	displayChooseSlots = false;
+	canChooseCards = false;
+	chooseSlots = undefined;
+}
+
+function turnOnTrumps() {
+	turnOnLabels(['chooseTrumps'])
+	turnOnClickableLabels(['submitTrumps', 'Yellow', 'Green', 'Blue', 'Black'])
+}
+
+function turnOnChooseTrumps() {
+	// display new trumps value
+	labels["trumps"].text = 'Trumps: ' + trumps;
+	labels["trumps"].color2 = toColor(trumps);
+	turnOnLabels(['chooseTrumps'])
+	turnOnClickableLabels(['Yellow', 'Blue', 'Black', 'Green', 'submitTrumps'])
+}
+
+function setTrumps(newTrumps){
+	trumps = newTrumps
+	updateTrumps()
+}
+
+function submitChosenCards() {
+	turnOffChooseSlots();
+	socket.emit('update cards', handSlots)
+}
+
+function submitTrumps() {
+	socket.emit('set trumps', trumps)
 }
 
 function turnOnPlay(){
 	canPlayCard = true;
 }
 
-function turnOnBet(){
-	labels["betting"].visible = false;
-	labels["currentBet"].visible = true;
-	labels["bet"].visible = true;
-	labels["bet"].clickable = true;
-	labels["pass"].visible = true;
-	labels["pass"].clickable = true;
-	canBet = true;
-}
-
-function turnOffBet() {
-	labels["pass"].visible = false;
-	labels["pass"].clickable = false;
-	labels["bet"].visible = false;
-	labels["bet"].clickable = false;
-	canBet = false;
-}
-
-function submitChosenCards() {
-	canChooseCards = false;
-	chooseSlots = [];
-	displayChooseSlots = false;
-	labels["submitCards"].visible = false;
-	labels["submitCards"].clickable = false;
-	labels["chooseCards"].visible = false;
-
-	socket.emit('update cards', handSlots)
-}
-
-function submitTrumps() {
-	socket.emit('set trumps', this.trumps)
-}
-
 function turnOffPlay(){
 	canPlayCard = false;
-}
-
-function handleBet() {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-	if (canBet) {
-		var newBet = currentBet + betIncrements;
-		labels["currentBet"].text = 'Current Bet: ' + newBet;
-		socket.emit("bet", newBet);
-		labels["betting"].visible = true;
-		turnOffBet();
-	}
-}
-
-function handlePass() {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-	if (canBet) {
-		socket.emit("pass");
-		labels["betting"].visible = true;
-		turnOffBet();
-	}
 }
 
 function playCard(index) {
@@ -287,95 +287,74 @@ function displayRoundResult(winningTeam) {
 function prepareForEnd(){
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	displayChooseSlots = false;
-	handleResize();
+	canBet = false;
 	canPlayCard = false;
+	displayCardSlots = false;
 	readyToEnd = false;
 	opponentCard = undefined;
 	playerCard = undefined;
-	displayCardSlots = false;
-	labels["betting"].visible = false;
-	labels["currentBet"].visible = false;
-	turnOffBet();
+	winningTeam = undefined;
+	matchEndReason = undefined;
+
+	turnOffLabels(activeLabels)
+	// resetDots(dottedLabels);
 
 	for (var i = 0; i < handSlots.length; i++) {
-		handSlots[i].card = undefined;
+		handSlots[i] = undefined;
 	}
 
 	for (var i = 0; i < chooseSlots.length; i++) {
-		chooseSlots[i].card = undefined;
+		chooseSlots[i] = undefined;
 	}
 }
 
-function quitMatch() {
+function abbortMatch() {
 	prepareForEnd();
 
-	labels["rematch"].disabled = true;
-	labels["rematch"].clickable = false;
+	disableLables(["rematch"])
 	labels["result"].text = "A Player Disconnected";
 	labels["result"].size = 90;
-	labels["result"].visible = true;
-	labels["rematch"].visible = true;
-	labels["main menu"].visible = true;
-	labels["main menu"].clickable = true;
-	winningTeam = undefined;
-	matchEndReason = undefined;
+	turnOnLabels["result", "rematch"]
+	turnOnClickableLabels(["main menu"])
 }
 
 function endMatch() {
+
+
 	prepareForEnd();
 
-	if (matchEndReason === "player left") {
-		var reason = ["Your opponent", "You"][+(team.id !== winningTeam.id)] + " left the match";
-		labels["rematch"].disabled = true;
-		labels["rematch"].clickable = false;
-	} else {
-		var reason = ["Your opponent has", "You have"][+(team.id === winningTeam.id)] + " a full set";
-		labels["rematch"].clickable = true;
-	}
-
 	labels["result"].text = ["You Lose!", "You Win!"][+(team.id === winningTeam.id)];
-	labels["result"].visible = true;
-	labels["rematch"].visible = true;
-	labels["main menu"].visible = true;
-	labels["main menu"].clickable = true;
-	winningTeam = undefined;
-	matchEndReason = undefined;
+	turnOnLabels(["results"])
+	turnOnClickableLabels(["main menu", "rematch"])
+	
+	if (matchEndReason === "player left") {
+		disableLabels(["rematch"])
+	}
 }
 
 function exitMatch() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	playerPoints = [];
-	opponentPoints = [];
+	prepareForEnd();
+
 	socket.emit("leave match");
-	labels["result"].visible = false;
-	labels["main menu"].visible = false;
-	labels["main menu"].clickable = false;
-	labels["rematch"].visible = false;
-	labels["rematch"].clickable = false;
-	labels["rematch"].disabled = false;
-	labels["waiting"].visible = false;
-	resetDots(labels["waiting"]);
-	labels["play"].visible = true;
-	labels["play"].clickable = true;
-	labels["logo"].visible = true;
+
+	turnOnClickableLabels(["play"])
+	turnOnLabels(["logo"])
 }
 
 function requestRematch() {
 	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	socket.emit("request rematch");
-	labels["rematch"].visible = false;
-	labels["rematch"].clickable = false;
-	labels["waiting"].visible = true;
+	turnOffLabels(["rematch"])
+	turnOnLabels(["waiting"])
 }
 
 function animateLabels() {
-	var dotLabels = [labels["waiting"], labels["searching"], labels["betting"], labels["chooseCards"], labels["chooseTrumps"], labels["playerChoosingCards"], labels["playerChoosingTrumps"]];
-	for (var i = 0; i < dotLabels.length; i++) {
-		if (dotLabels[i].visible) {
-			updateDots(dotLabels[i]);
+	for (var i = 0; i < dottedLabels.length; i++) {
+		if (dottedLabels[i].visible) {
+			updateDots(dottedLabels[i]);
 		}
 	}
 }

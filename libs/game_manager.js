@@ -16,7 +16,7 @@ const handSize = 10;
 const potSize = 5;
 
 const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
-const colors = ["yellow", "green", "blue", "black"];
+const colors = ["Yellow", "Green", "Blue", "Black"];
 const rook = {
 	number: 20,
 	color: "ROOK"
@@ -42,20 +42,20 @@ module.exports.listen = function(app) {
 			leaveQueue(socket);
 		});
 
-		socket.on("update cards", function(cards) {
-			updateChosenCards(socket, cards)
-		})
-
-		socket.on("set trumps", function(newTrumps) {
-			setTrumps(socket, newTrumps);
-		})
-
 		socket.on("bet", function(bet) {
 			handleBet(socket, bet);
 		});
 
 		socket.on("pass", function() {
 			handlePass(socket);
+		})
+
+		socket.on("update cards", function(cards) {
+			updateChosenCards(socket, cards)
+		})
+
+		socket.on("set trumps", function(newTrumps) {
+			setTrumps(socket, newTrumps);
 		})
 
 		socket.on("play card", function(index) {
@@ -85,7 +85,7 @@ module.exports.listen = function(app) {
  */
 function playerDisconnected(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	console.log('Player Disconnected: ', socket.id);
+
 	var player = findPlayerById(socket.id);
 	var index = players.indexOf(player);
 	if (index > -1) {
@@ -277,7 +277,6 @@ function dealHand(deck, numCards) {
 	for (var card = 0; card < numCards; card++) {
 		hand.push(drawCard(deck));
 	}
-
 	return hand;
 }
 
@@ -346,8 +345,9 @@ function callBet(match) {
 		callBet(match);
 	}
 	else {
+		console.log('here')
 		match.round.roundBetter = match.round.currentBetters[0];
-		io.to(match.matchId).emit("turn off bet");
+		io.to(match.matchId).emit("end betting");
 		startRound(match);
 	}
 }
@@ -384,7 +384,7 @@ function startRound(match) {
 
 	for (var i = 0; i < match.players.length; i++) {
 		if (match.players[i] === match.round.roundBetter ) {
-			match.round.roundBetter.socket.emit('choose cards');
+			match.round.roundBetter.socket.emit('turn on choose cards');
 		}
 		else {
 			match.players[i].socket.emit('waiting on bet winner to choose cards')
@@ -401,10 +401,9 @@ function updateChosenCards(socket, cards) {
 
 	for (var i = 0; i < match.players.length; i++) {
 		if (match.players[i] === player) {
-			console.log('found him')
-
-			match.players[i].socket.emit("choose trumps");
+			match.players[i].socket.emit("turn on choose trumps");
 		} else {
+			console.log('emitting waitingo on better to choose trumps')
 			match.players[i].socket.emit("waiting on bet winner to choose trumps")
 		}
 	}
@@ -415,7 +414,6 @@ function setTrumps(socket, newTrumps) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	var match = findMatchBySocketId(socket.id);
-	console.log(match)
 	match.round.trumps = newTrumps;
 
 	io.to(match.matchId).emit("set trumps", newTrumps);
@@ -556,6 +554,7 @@ function processRound(match) {
  */
 function nextRound(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	for (var i = 0; i < match.players.length; i++) {
 		match.players[i].currentCard = undefined;
 		for (var j = 0; j < match.players[i].cards.length; j++) {
@@ -571,36 +570,6 @@ function nextRound(match) {
 	handleTurn(match)
 }
 
-function checkForSet(player) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	for (var i = 0; i < player.points.length; i++) {
-		var setColors = [];
-		for (var j = 0; j < player.points[i].length; j++) {
-			if (setColors.indexOf(player.points[i][j].color) === -1) {
-				setColors.push(player.points[i][j].color);
-			}
-		}
-		// If the player has 3 of the same element of different color
-		if (setColors.length >= 3) {
-			return true;
-		}
-	}
-	for (var i = 0; i < player.points[0].length; i++) {
-		for (var j = 0; j < player.points[1].length; j++) {
-			for (var k = 0; k < player.points[2].length; k++) {
-				
-				// If player has 3 different elements with 3 different colors
-				if (player.points[0][i].color !== player.points[1][j].color &&
-					player.points[0][i].color !== player.points[2][k].color &&
-					player.points[1][j].color !== player.points[2][k].color) {
-					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
 /**
  * Handles when a player tries to leave a match
  * @param socket 
@@ -611,7 +580,7 @@ function leaveMatch(socket) {
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
 		if (!match.isOver) {
-			quitMatch(match);
+			abbortMatch(match);
 		} else {
 			io.to(match.matchId).emit("no rematch");
 		}
@@ -619,11 +588,10 @@ function leaveMatch(socket) {
 	}
 }
 
-function quitMatch(match) {
+function abbortMatch(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
-	io.to(match.matchId).emit("quit match", "player left");
-	
+	io.to(match.matchId).emit("abbort match", "player left");
 	match.isOver = true;
 }
 
@@ -637,7 +605,6 @@ function endMatch(match, winningTeam, reason) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	io.to(match.matchId).emit("end match", winningTeam, reason);
-	
 	match.isOver = true;
 }
 
@@ -647,6 +614,7 @@ function endMatch(match, winningTeam, reason) {
  */
 function removeMatch(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	var index = matches.indexOf(match);
 	if (index > -1) {
 		matches.splice(index, 1);
@@ -675,10 +643,8 @@ function rematchRequested(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	var match = findMatchBySocketId(socket.id);
-
 	if (match) {
 		match.rematch += 1;
-
 		if (match.rematch == match.players.length) {
 			removeMatch(match);
 			createMatch(match.players);
