@@ -44,13 +44,17 @@ socket.on("update current bet", function(newBet, bettingTeamId) {
 })
 
 socket.on("choose cards", function() {
-	// labels["chooseCards"].visible = true;
-	// canChooseCards = true;
-	socket.emit("update cards", handSlots);
+	labels["chooseCards"].visible = true;
+	canChooseCards = true;
+	labels["submitCards"].visible = true;
+	labels["submitCards"].clickable = true;
 })
 
 socket.on("choose trumps", function() {
 	labels["chooseTrumps"].visible = true;
+	labels["submitTrumps"].visible = true;
+	labels["submitTrumps"].clickable = true;
+
 	labels["red"].visible = true;
 	labels["green"].visible = true;
 	labels["blue"].visible = true;
@@ -70,11 +74,15 @@ socket.on("set trumps", function(newTrumps) {
 })
 
 socket.on("waiting on bet winner to choose cards", function() {
-	console.log('in here waiting')
 	labels["playerChoosingCards"].visible = true;
 })
 
 socket.on("waiting on bet winner to choose trumps", function() {
+	console.log('here')
+	chooseSlots = [];
+	displayChooseSlots = false;
+
+	labels["playerChoosingCards"].visible = false;
 	labels["playerChoosingTrumps"].visible = true;
 })
 
@@ -199,9 +207,19 @@ function turnOffBet() {
 	canBet = false;
 }
 
-function doneChoosingCards() {
+function submitChosenCards() {
 	canChooseCards = false;
-	socket.emit('choose cards', handSlots)
+	chooseSlots = [];
+	displayChooseSlots = false;
+	labels["submitCards"].visible = false;
+	labels["submitCards"].clickable = false;
+	labels["chooseCards"].visible = false;
+
+	socket.emit('update cards', handSlots)
+}
+
+function submitTrumps() {
+	socket.emit('set trumps', this.trumps)
 }
 
 function turnOffPlay(){

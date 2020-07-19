@@ -61,15 +61,17 @@ function init() {
 	labels["pass"] = new Label(secondaryColor, toColor("ROOK"), {x: 0.125, y: 0.45}, "Pass", 70, false, true, false, labelFont, handlePass);
 	labels["betting"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.25}, "Waiting for other players to bet   ", 50, false, false, false, labelFont);
 	labels["chooseCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Choose which cards to discard   ", 50, false, false, false, labelFont);
+	labels["submitCards"] = new Label(primaryColor, secondaryColor, {x: 0.8, y: 0.7}, "Choose Cards", 50, false, true, false, labelFont, submitChosenCards)
+	labels["submitTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.8, y: 0.7}, "Choose Trumps", 50, false, true, false, labelFont, submitTrumps)
+	
 	labels["playerChoosingCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
 	labels["playerChoosingTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, labelFont);
 
-	console.log('before')
 	labels["chooseTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Choose trumps color   ", 50, false, true, false, labelFont);
-	labels["red"] = new Label(secondaryColor, toColor("red"), {x: 0.2, y: 0.5}, "Red", 50, false, true, false, labelFont, chooseRedTrumps);
-	labels["blue"] = new Label(secondaryColor, toColor("blue"), {x: 0.4, y: 0.5}, "Blue", 50, false, true, false, labelFont, chooseBlueTrumps);
-	labels["green"] = new Label(secondaryColor, toColor("green"), {x: 0.6, y: 0.5}, "Green", 50, false, true, false, labelFont, chooseGreenTrumps);
-	labels["black"] = new Label(secondaryColor, toColor("black"), {x: 0.8, y: 0.5}, "Black", 50, false, true, false, labelFont, chooseBlackTrumps);
+	labels["red"] = new Label(secondaryColor, toColor("ROOK"), {x: 0.2, y: 0.4}, "Red", 50, false, true, false, labelFont, chooseRedTrumps);
+	labels["blue"] = new Label(secondaryColor, toColor("blue"), {x: 0.4, y: 0.4}, "Blue", 50, false, true, false, labelFont, chooseBlueTrumps);
+	labels["green"] = new Label(secondaryColor, toColor("green"), {x: 0.6, y: 0.4}, "Green", 50, false, true, false, labelFont, chooseGreenTrumps);
+	labels["black"] = new Label(secondaryColor, toColor("black"), {x: 0.8, y: 0.4}, "Black", 50, false, true, false, labelFont, chooseBlackTrumps);
 
 	labels["trumps"] = new Label(secondaryColor, secondaryColor, {x: 0.9, y: 0.1}, "", 30, false, false, false, labelFont);
 }
@@ -401,7 +403,10 @@ function chooseGreenTrumps() {
 }
 
 function chooseTrumps(newTrumps) {
-	socket.emit("set trumps", newTrumps);
+
+	labels["submitTrumps"].text = "Choose " + newTrumps;
+	labels["submitTrumps"].color1 = toColor(newTrumps);
+	this.trumps = newTrumps;
 }
 //////////  Initialize  \\\\\\\\\\
 window.requestAnimFrame = (function () {

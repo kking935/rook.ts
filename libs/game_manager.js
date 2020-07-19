@@ -395,9 +395,20 @@ function startRound(match) {
 function updateChosenCards(socket, cards) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
+	var match = findMatchBySocketId(socket.id)
 	var player = findPlayerById(socket.id);
 	player.cards = cards;
-	player.socket.emit("choose trumps");
+
+	for (var i = 0; i < match.players.length; i++) {
+		if (match.players[i] === player) {
+			console.log('found him')
+
+			match.players[i].socket.emit("choose trumps");
+		} else {
+			match.players[i].socket.emit("waiting on bet winner to choose trumps")
+		}
+	}
+
 }
 
 function setTrumps(socket, newTrumps) {
