@@ -214,7 +214,7 @@ function createRound(roundNumber, deck) {
 		roundBetter: undefined,				// The team that bet on this round
 		currentBetters: players.slice(0),			// Initialize the round's betters to be all the players
 		trumps: undefined,					// The card color for trumps
-		ciruit: createCircuit()				// The circuit of plays
+		circuit: createCircuit()				// The circuit of plays
 	}
 	return newRound;
 }
@@ -459,7 +459,11 @@ function playCard(socket, index) {
 function handleTurn(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
-	var turn = match.round.turn;
+	console.log('in handle turn')
+	console.log(match.round)
+	var turn = match.round.circuit.turnToPlay;
+	console.log( turn)
+
 	if (turn < match.players.length) {
 		match.players[turn].socket.emit("turn play on");
 	}

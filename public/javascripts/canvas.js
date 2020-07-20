@@ -234,7 +234,6 @@ function handleResize() {
 	if (selectedSlot) { setSlotsPosition(selectedSlot.card, selectedSlotX, selectedSlotY, selectedSlot.slotNum, 1) };
 }
 
-
 ///////  isOn Helpers  \\\\\\\
 // ------------------------- \\ 
 function isOnSlot(event, slot) {
@@ -326,6 +325,7 @@ function handleMouseUp(event) {
 		}
 	}
 
+	if (displayCardSlots)
 	for (var i in handSlots) {
 		if (isOnSlot(event, handSlots[i]) && !selectedCard) {
 			selectedCard = {
@@ -345,6 +345,7 @@ function handleMouseUp(event) {
 		}
 	}
 
+	if (canChooseCards)
 	for (var i in chooseSlots) {
 		if (isOnSlot(event, chooseSlots[i]) && canChooseCard) {
 			if (selectedSlot) {
@@ -377,9 +378,15 @@ function updateCurrentBet(newBet, bettingTeamId) {
 /////////  Trumps  \\\\\\\\\\\
 // ------------------------- \\
 
-function updateTrumps(newTrumps) {
-	labels["submitTrumps"].text = "Choose " + trumps;
-	labels["submitTrumps"].color2 = toColor(trumps);
+function updateTrumps() {
+	if (labels["submitTrumps"].visible) {
+		labels["submitTrumps"].text = "Choose " + trumps;
+		labels["submitTrumps"].color2 = toColor(trumps);
+	}
+	if (labels["trumps"].visible) {
+		labels["trumps"].text = 'Trumps: ' + trumps;
+		labels["trumps"].color2 = toColor(trumps);
+	}
 }
 
 function chooseYellowTrumps() {
@@ -431,7 +438,7 @@ function init() {
 	labels["Green"] = new Label(secondaryColor, toColor("Green"), {x: 0.6, y: 0.3}, "Green", 50, false, true, false, labelFont, chooseGreenTrumps);
 	labels["Black"] = new Label(secondaryColor, toColor("Black"), {x: 0.8, y: 0.3}, "Black", 50, false, true, false, labelFont, chooseBlackTrumps);
 	labels["submitTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.675}, "Choose Trumps", 50, false, true, false, labelFont, submitTrumps)
-	labels["trumps"] = new Label(secondaryColor, secondaryColor, {x: 0.9, y: 0.1}, "Trumps: None", 30, false, false, false, labelFont);
+	labels["trumps"] = new Label(secondaryColor, secondaryColor, {x: 0.9, y: 0.1}, `Trumps: ${trumps}`, 30, false, false, false, labelFont);
 
 	labels["playerChoosingCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
 	labels["playerChoosingTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, labelFont);

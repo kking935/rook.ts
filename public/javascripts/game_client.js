@@ -107,7 +107,7 @@ socket.on("no rematch", function() {
 
 //////////  Functions  \\\\\\\\\\
 function enterQueue() {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	socket.emit("enter queue");
 	turnOffLabels(["play"])
@@ -115,7 +115,7 @@ function enterQueue() {
 }
 
 function enterMatch(newTeam) {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	team = newTeam;
 	playerPoints = [];
@@ -125,7 +125,7 @@ function enterMatch(newTeam) {
 }
 
 function updateCards(cards) {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	handSlots = [cards.length];
 
@@ -154,13 +154,13 @@ function turnOffBet(){
 }
 
 function endBet() {
-	console.log('\n\nending betting')
+	// // console.log('\n\nending betting')
 	turnOffLabels(['betting', 'bet', 'pass', 'currentBet'])
 	canBet = false;
 }
 
 function handleBet() {
-	 //  // if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	 //  // // // if (logFull) // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	if (canBet) {
 		var newBet = currBet + betIncrements;
@@ -172,7 +172,7 @@ function handleBet() {
 }
 
 function handlePass() {
-	//  // if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	//  // // // if (logFull) // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
    
    if (canBet) {
 	   socket.emit("pass");
@@ -182,7 +182,7 @@ function handlePass() {
 }
 
 function updateChooseCards(cards) {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// // if (logFull) // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	chooseSlots = [cards.length];
 
@@ -219,8 +219,6 @@ function turnOnTrumps() {
 
 function turnOnChooseTrumps() {
 	// display new trumps value
-	labels["trumps"].text = 'Trumps: ' + trumps;
-	labels["trumps"].color2 = toColor(trumps);
 	turnOnLabels(['chooseTrumps'])
 	turnOnClickableLabels(['Yellow', 'Blue', 'Black', 'Green', 'submitTrumps'])
 }
@@ -236,7 +234,8 @@ function submitChosenCards() {
 }
 
 function submitTrumps() {
-	socket.emit('set trumps', trumps)
+	if (trumps != undefined)
+		socket.emit('set trumps', trumps)
 }
 
 function turnOnPlay(){
@@ -248,7 +247,7 @@ function turnOffPlay(){
 }
 
 function playCard(index) {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	if (canPlayCard) {
 		socket.emit("play card", index);
@@ -257,13 +256,13 @@ function playCard(index) {
 }
 
 function unknownCardPlayed() {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	opponentCard = {isUnknown: true};
 }
 
 function displayCircuitResult(team) {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	if (this.team.id === winningTeam.id) {
 		// Add winning label here
@@ -274,7 +273,7 @@ function displayCircuitResult(team) {
 
 
 function displayRoundResult(winningTeam) {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	if (this.team.id === winningTeam.id) {
 		// Add winning label here
@@ -284,7 +283,7 @@ function displayRoundResult(winningTeam) {
 }
 
 function prepareForEnd(){
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	canBet = false;
 	canPlayCard = false;
@@ -292,7 +291,7 @@ function prepareForEnd(){
 	displayChooseSlots = false;
 	readyToEnd = false;
 
-	trumps = undefined
+	trumps = undefined;
 	opponentCards = undefined;
 	playerCard = undefined;
 	winningTeam = undefined;
@@ -301,7 +300,7 @@ function prepareForEnd(){
 	
 	var strLabs = []
 	for (var i in labels) {
-		console.log('removee', i)
+		// // console.log('removee', i)
 		strLabs.push(i)
 	}
 	turnOffLabels(strLabs)
@@ -320,7 +319,7 @@ function prepareForEnd(){
 }
 
 function abbortMatch() {
-	console.log('abborting')
+	// // console.log('abborting')
 	prepareForEnd();
 
 	disableLabels(["rematch"])
@@ -345,7 +344,7 @@ function endMatch() {
 }
 
 function exitMatch() {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	prepareForEnd();
 
@@ -356,7 +355,7 @@ function exitMatch() {
 }
 
 function requestRematch() {
-	if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	socket.emit("request rematch");
 	turnOffLabels(["rematch"])
