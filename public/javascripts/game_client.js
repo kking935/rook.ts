@@ -54,8 +54,8 @@ socket.on("turn on choose trumps", function() {
 	turnOnChooseTrumps()
 })
 
-socket.on("set trumps", function(newTrumps) {
-	setTrumps(newTrumps)
+socket.on("start round with trumps", function(newTrumps) {
+	startRoundWithTrumps(newTrumps)
 })
 
 socket.on("turn play on", function() {
@@ -229,24 +229,37 @@ function chooseTrumps(newTrumps){
 	turnOnClickableLabels(['submitTrumps'])
 }
 
-
-function setTrumps(newTrumps){
-	trumps = newTrumps
-	updateTrumps()
-}
-
 function submitChosenCards() {
 	turnOffChooseSlots();
 	socket.emit('update cards', handSlots)
 }
 
 function submitTrumps() {
-	if (trumps != undefined)
+	if (trumps != undefined) {
 		socket.emit('set trumps', trumps)
+		turnOffLabels(['chooseTrumps', 'Yellow', 'Blue', 'Green', 'Black', 'submitTrumps'])
+	}
+}
+
+function startRoundWithTrumps(newTrumps){
+	turnOffLabels(['playerChoosingTrumps'])
+	trumps = newTrumps
+	updateTrumps()
+	turnOnLabels(['trumps', 'waitingToPlay'])
+	disableLabels(['submitSelectedCard'])
+}
+
+function submitSelectedCard() {
+	if (canPlayCard && selectedSlot) {
+		socket.emit('play card', selectedSlot)
+	}
 }
 
 function turnOnPlay(){
 	canPlayCard = true;
+	turnOffLabels(['waitingToPlay'])
+	turnOnLabels(['yourTurn'])
+	turnOnClickableLabels(['submitSelectedCard'])
 }
 
 function turnOffPlay(){

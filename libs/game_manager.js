@@ -416,7 +416,7 @@ function setTrumps(socket, newTrumps) {
 	var match = findMatchBySocketId(socket.id);
 	match.round.trumps = newTrumps;
 
-	io.to(match.matchId).emit("set trumps", newTrumps);
+	io.to(match.matchId).emit("start round with trumps", newTrumps);
 
 	handleTurn(match);
 }

@@ -27,6 +27,7 @@ function turnOnClickableLabels(labelsList) {
 		// console.log('Turning on clickable label: ', labels[`${labelsList[i]}`])
 		labels[`${labelsList[i]}`].visible = true;
 		labels[`${labelsList[i]}`].clickable = true;
+		labels[`${labelsList[i]}`].disabled = false;
 	}
 }
 
@@ -327,16 +328,16 @@ function handleMouseUp(event) {
 
 	if (displayCardSlots)
 	for (var i in handSlots) {
-		if (isOnSlot(event, handSlots[i]) && !selectedCard) {
-			selectedCard = {
+		if (isOnSlot(event, handSlots[i]) && !selectedSlot) {
+			selectedSlot = {
 				slotNum: i,
 				card: handSlots[i],
 			}
 			return;
-		} else if (isOnSlot(event, handSlots[i]) && selectedCard) {
+		} else if (isOnSlot(event, handSlots[i]) && selectedSlot) {
 			const swapCard = handSlots[i]
-			handSlots[i] = selectedCard.card;
-			handSlots[selectedCard.slotNum] = swapCard
+			handSlots[i] = selectedSlot.card;
+			handSlots[selectedSlot.slotNum] = swapCard
 			selectedSlot = 	selectedSlot = {
 				slotNum: undefined,
 				card: undefined
@@ -441,6 +442,10 @@ function init() {
 	labels["playerChoosingCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
 	labels["playerChoosingTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, labelFont);
 
+	labels["waitingToPlay"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Waiting to play   ", 55, false, false, false, labelFont);
+	labels["yourTurn"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Your Turn   ", 55, false, false, false, labelFont);
+	labels["submitSelectedCard"] = new Label(primaryColor, secondaryColor, {x: 0.75, y: 0.65}, "Play Card", 40, false, false, false, labelFont, submitSelectedCard);
+
 	this.dottedLabels = [
 		labels["waiting"], 
 		labels["searching"], 
@@ -448,7 +453,9 @@ function init() {
 		labels["chooseCards"], 
 		labels["chooseTrumps"], 
 		labels["playerChoosingCards"], 
-		labels["playerChoosingTrumps"]
+		labels["playerChoosingTrumps"],
+		labels['waitingToPlay'],
+		labels['yourTurn']
 	];
 }
 
