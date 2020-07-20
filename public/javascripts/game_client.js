@@ -17,10 +17,9 @@ var canChooseCards = false;
 var canPlayCard = false;
 
 var opponentCard, playerCard, winningTeam, matchEndReason, readyToEnd;
-var currentBet = 0;
+var currBet = 0;
 var betIncrements = 5;
 
-var activeLabels = [];
 
 //////////  Socket Events  \\\\\\\\\\
 socket.on("update cards", function(cards) {
@@ -164,7 +163,7 @@ function handleBet() {
 	 //  // if (logFull) console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	if (canBet) {
-		var newBet = currentBet + betIncrements;
+		var newBet = currBet + betIncrements;
 		labels["currentBet"].text = 'Current Bet: ' + newBet;
 		
 		socket.emit("bet", newBet);
@@ -290,31 +289,44 @@ function prepareForEnd(){
 	canBet = false;
 	canPlayCard = false;
 	displayCardSlots = false;
+	displayChooseSlots = false;
 	readyToEnd = false;
-	opponentCard = undefined;
+
+	trumps = undefined
+	opponentCards = undefined;
 	playerCard = undefined;
 	winningTeam = undefined;
 	matchEndReason = undefined;
 
-	turnOffLabels(activeLabels)
+	
+	var strLabs = []
+	for (var i in labels) {
+		console.log('removee', i)
+		strLabs.push(i)
+	}
+	turnOffLabels(strLabs)
+
 	// resetDots(dottedLabels);
 
+	if (handSlotsMulti)
 	for (var i = 0; i < handSlots.length; i++) {
 		handSlots[i] = undefined;
 	}
 
+	if (chooseSlots)
 	for (var i = 0; i < chooseSlots.length; i++) {
 		chooseSlots[i] = undefined;
 	}
 }
 
 function abbortMatch() {
+	console.log('abborting')
 	prepareForEnd();
 
-	disableLables(["rematch"])
-	labels["result"].text = "A Player Disconnected";
-	labels["result"].size = 90;
-	turnOnLabels["result", "rematch"]
+	disableLabels(["rematch"])
+	labels["reason"].text = "A Player Disconnected";
+	labels["reason"].size = 90;
+	turnOnLabels(["reason", "rematch"])
 	turnOnClickableLabels(["main menu"])
 }
 
@@ -323,8 +335,8 @@ function endMatch() {
 
 	prepareForEnd();
 
-	labels["result"].text = ["You Lose!", "You Win!"][+(team.id === winningTeam.id)];
-	turnOnLabels(["results"])
+	labels["reason"].text = ["You Lose!", "You Win!"][+(team.id === winningTeam.id)];
+	turnOnLabels(["reason"])
 	turnOnClickableLabels(["main menu", "rematch"])
 	
 	if (matchEndReason === "player left") {

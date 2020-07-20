@@ -24,27 +24,26 @@ function Label(color1, color2, position, text, size, visible, clickable, disable
 // ------------------------- \\
 function turnOnClickableLabels(labelsList) {
 	for (var i in labelsList) {
-		console.log('Turning on clickable label: ', labels[`${labelsList[i]}`])
+		// console.log('Turning on clickable label: ', labels[`${labelsList[i]}`])
 		labels[`${labelsList[i]}`].visible = true;
 		labels[`${labelsList[i]}`].clickable = true;
 	}
 }
 
 function turnOnLabels(labelsList) {
-	console.log('-------------- Turning on labels -----------------')
+	// console.log('-------------- Turning on labels -----------------')
 
 	for (var i in labelsList) {
-		console.log('Turning on label: ', labels[`${labelsList[i]}`])
+		// console.log('Turning on label: ', labels[`${labelsList[i]}`])
 		labels[`${labelsList[i]}`].visible = true;
-		activeLabels.push(labels[`${labelsList[i]}`])
 	}
 }
 
 function disableLabels(labelsList) {
-	console.log('-------------- Disabling labels -----------------')
+	// console.log('-------------- Disabling labels -----------------')
 
 	for (var i in labelsList) {
-		console.log("Disabling labels: ", labels[`${labelsList[i]}`])
+		// console.log("Disabling labels: ", labels[`${labelsList[i]}`])
 		labels[`${labelsList[i]}`].disabled = true;
 		labels[`${labelsList[i]}`].clickable = false;
 		labels[`${labelsList[i]}`].visible = true;
@@ -54,10 +53,10 @@ function disableLabels(labelsList) {
 function turnOffLabels(labelsList) {
 	console.log('-------------- Turning off labels -----------------')
 	for (var i in labelsList) {
-		console.log('turning off label ',labels[`${labelsList[i]}`] )
+		// console.log('labelsList[i]: ', labelsList[i])
+		console.log('turning off label ',labelsList[i] )
 		labels[`${labelsList[i]}`].visible = false;
 		labels[`${labelsList[i]}`].clickable = false;
-		activeLabels = activeLabels.slice(activeLabels.indexOf(labels[`${labelsList[i]}`]), 1)
 	}
 	
 }
@@ -363,8 +362,8 @@ function handleMouseUp(event) {
 /////////  Betting  \\\\\\\\\\
 // ------------------------- \\
 function updateCurrentBet(newBet, bettingTeamId) {
-	currentBet = newBet;
-	labels["currentBet"].text = "Current Bet: " + currentBet;
+	currBet = newBet;
+	labels["currentBet"].text = "Current Bet: " + currBet;
 	labels["currentBet"].color1 = "#0f0f0f";
 
 	if (team.id === bettingTeamId) {
@@ -416,21 +415,22 @@ function init() {
 	labels["result"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.3}, "", 192, false, false, false, labelFont);
 	labels["rematch"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.62}, "Rematch", 128, false, false, false, labelFont, requestRematch);
 	labels["main menu"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.78}, "Main Menu", 128, false, false, false, labelFont, exitMatch);
-	
+	labels["reason"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.25}, "", 128, false, false, false, labelFont);
+
 	labels["currentBet"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Current Bet: 0", 100, false, false, false, labelFont);
 	labels["bet"] = new Label(secondaryColor, toColor("Green"), {x: 0.875, y: 0.45}, "Bet", 70, false, true, false, labelFont, handleBet);
 	labels["pass"] = new Label(secondaryColor, toColor("Red"), {x: 0.125, y: 0.45}, "Pass", 70, false, true, false, labelFont, handlePass);
 	labels["betting"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.25}, "Waiting for other players to bet   ", 50, false, false, false, labelFont);
 	
 	labels["chooseCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Choose which cards to discard   ", 50, false, false, false, labelFont);
-	labels["submitCards"] = new Label(primaryColor, secondaryColor, {x: 0.8, y: 0.7}, "Choose Cards", 50, false, true, false, labelFont, submitChosenCards)
+	labels["submitCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.675}, "Choose Cards", 50, false, true, false, labelFont, submitChosenCards)
 	
 	labels["chooseTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Choose trumps color   ", 50, false, true, false, labelFont);
 	labels["Yellow"] = new Label(secondaryColor, toColor("Yellow"), {x: 0.2, y: 0.3}, "Yellow", 50, false, true, false, labelFont, chooseYellowTrumps);
 	labels["Blue"] = new Label(secondaryColor, toColor("Blue"), {x: 0.4, y: 0.3}, "Blue", 50, false, true, false, labelFont, chooseBlueTrumps);
 	labels["Green"] = new Label(secondaryColor, toColor("Green"), {x: 0.6, y: 0.3}, "Green", 50, false, true, false, labelFont, chooseGreenTrumps);
 	labels["Black"] = new Label(secondaryColor, toColor("Black"), {x: 0.8, y: 0.3}, "Black", 50, false, true, false, labelFont, chooseBlackTrumps);
-	labels["submitTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.6}, "Choose Trumps", 50, false, true, false, labelFont, submitTrumps)
+	labels["submitTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.675}, "Choose Trumps", 50, false, true, false, labelFont, submitTrumps)
 	labels["trumps"] = new Label(secondaryColor, secondaryColor, {x: 0.9, y: 0.1}, "Trumps: None", 30, false, false, false, labelFont);
 
 	labels["playerChoosingCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
