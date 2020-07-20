@@ -52,10 +52,10 @@ function disableLabels(labelsList) {
 }
 
 function turnOffLabels(labelsList) {
-	console.log('-------------- Turning off labels -----------------')
+	// console.log('-------------- Turning off labels -----------------')
 	for (var i in labelsList) {
 		// console.log('labelsList[i]: ', labelsList[i])
-		console.log('turning off label ',labelsList[i] )
+		// console.log('turning off label ',labelsList[i] )
 		labels[`${labelsList[i]}`].visible = false;
 		labels[`${labelsList[i]}`].clickable = false;
 	}
@@ -240,7 +240,7 @@ function handleResize() {
 function isOnSlot(event, slot) {
 	var x = (event.pageX - canvas.offsetLeft),
 		y = (event.pageY - canvas.offsetTop);
-	if (slot.card && canPlayCard) {
+	if (slot) {
 		if (x > slot.position.x && x < slot.position.x + cardWidth &&
 			y > slot.position.y && y < slot.position.y + cardHeight) {
 			return true;
@@ -328,17 +328,18 @@ function handleMouseUp(event) {
 
 	if (displayCardSlots)
 	for (var i in handSlots) {
-		if (isOnSlot(event, handSlots[i]) && !selectedSlot) {
+		if (selectedSlot === undefined && isOnSlot(event, handSlots[i])) {
 			selectedSlot = {
 				slotNum: i,
 				card: handSlots[i],
 			}
+			console.log(' new selectedSLot ', selectedSlot)
 			return;
-		} else if (isOnSlot(event, handSlots[i]) && selectedSlot) {
+		} else if (isOnSlot(event, handSlots[i])) {
 			const swapCard = handSlots[i]
 			handSlots[i] = selectedSlot.card;
 			handSlots[selectedSlot.slotNum] = swapCard
-			selectedSlot = 	selectedSlot = {
+			selectedSlot = {
 				slotNum: undefined,
 				card: undefined
 			};
@@ -348,7 +349,7 @@ function handleMouseUp(event) {
 
 	if (canChooseCards)
 	for (var i in chooseSlots) {
-		if (isOnSlot(event, chooseSlots[i]) && canChooseCard) {
+		if (canChooseCards && isOnSlot(event, chooseSlots[i])) {
 			if (selectedSlot) {
 				const discardCard = selectedSlot.card;
 				handSlots[selectedSlot.slotNum] = chooseSlots[i];
@@ -437,14 +438,14 @@ function init() {
 	labels["Green"] = new Label(secondaryColor, toColor("Green"), {x: 0.6, y: 0.3}, "Green", 50, false, true, false, labelFont, chooseGreenTrumps);
 	labels["Black"] = new Label(secondaryColor, toColor("Black"), {x: 0.8, y: 0.3}, "Black", 50, false, true, false, labelFont, chooseBlackTrumps);
 	labels["submitTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.675}, "Choose Trumps", 50, false, false, false, labelFont, submitTrumps)
-	labels["trumps"] = new Label(secondaryColor, secondaryColor, {x: 0.9, y: 0.1}, `Trumps: ${trumps}`, 30, false, false, false, labelFont);
+	labels["trumps"] = new Label(secondaryColor, secondaryColor, {x: 0.9, y: 0.05}, `Trumps: ${trumps}`, 30, false, false, false, labelFont);
 
 	labels["playerChoosingCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
 	labels["playerChoosingTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, labelFont);
 
 	labels["waitingToPlay"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Waiting to play   ", 55, false, false, false, labelFont);
 	labels["yourTurn"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Your Turn   ", 55, false, false, false, labelFont);
-	labels["submitSelectedCard"] = new Label(primaryColor, secondaryColor, {x: 0.75, y: 0.65}, "Play Card", 40, false, false, false, labelFont, submitSelectedCard);
+	labels["submitSelectedCard"] = new Label(primaryColor, secondaryColor, {x: 0.87, y: 0.65}, "Play Card", 40, false, false, false, labelFont, submitSelectedCard);
 
 	this.dottedLabels = [
 		labels["waiting"], 
