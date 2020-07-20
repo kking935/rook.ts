@@ -214,14 +214,21 @@ function turnOffChooseSlots() {
 
 function turnOnTrumps() {
 	turnOnLabels(['chooseTrumps'])
-	turnOnClickableLabels(['submitTrumps', 'Yellow', 'Green', 'Blue', 'Black'])
+	turnOnClickableLabels(['Yellow', 'Green', 'Blue', 'Black'])
 }
 
 function turnOnChooseTrumps() {
 	// display new trumps value
 	turnOnLabels(['chooseTrumps'])
-	turnOnClickableLabels(['Yellow', 'Blue', 'Black', 'Green', 'submitTrumps'])
+	turnOnClickableLabels(['Yellow', 'Blue', 'Black', 'Green'])
 }
+
+function chooseTrumps(newTrumps){
+	trumps = newTrumps
+	updateSubmitTrumps()
+	turnOnClickableLabels(['submitTrumps'])
+}
+
 
 function setTrumps(newTrumps){
 	trumps = newTrumps
