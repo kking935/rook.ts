@@ -348,17 +348,29 @@ function handleMouseUp(event) {
 
 	if (displayCardSlots) {
 		for (var i in handSlots) {
-			if ((selectedHandSlot === undefined || selectedHandSlot.card === undefined) && isOnSlot(event, handSlots[i])) {
-				selectedHandSlot = {
-					slotNum: i,
-					card: handSlots[i],
+			if (isOnSlot(event, handSlots[i])) {
+				if (selectedHandSlot === undefined || selectedHandSlot.card === undefined) {
+					if (selectedChooseSlot) {
+						const swapCard = handSlots[i]
+						console.log('swapping card ', swapCard)
+						handSlots[i] = selectedChooseSlot.card
+						console.log('replacing with card ', handSlots[i])
+						chooseSlots[selectedChooseSlot.slotNum] = swapCard
+						console.log('new choose slot ', chooseSlots[selectedChooseSlot.slotNum])
+						selectedChooseSlot = undefined
+					}
+					else {
+						selectedHandSlot = {
+							slotNum: i,
+							card: handSlots[i],
+						}
+					}
+				} else {
+					const swapCard = handSlots[i]
+					handSlots[i] = selectedHandSlot.card;
+					handSlots[selectedHandSlot.slotNum] = swapCard
+					selectedHandSlot = undefined;
 				}
-				return;
-			} else if (isOnSlot(event, handSlots[i])) {
-				const swapCard = handSlots[i]
-				handSlots[i] = selectedHandSlot.card;
-				handSlots[selectedHandSlot.slotNum] = swapCard
-				selectedHandSlot = undefined;
 				handleResize();
 				return;
 			}
@@ -373,20 +385,13 @@ function handleMouseUp(event) {
 						slotNum: i, 
 						card: chooseSlots[i]
 					}
-					console.log('selected choose slot: ', selectedChooseSlot)
 				}
 				else {
 					var tempSlot = chooseSlots[i];
-					console.log(tempSlot)
 					chooseSlots[i] = selectedChooseSlot.card;
 					chooseSlots[selectedChooseSlot.slotNum] = tempSlot
-					console.log(`chooseSlots[${selectedChooseSlot.slotNum}]: `, chooseSlots[selectedChooseSlot.slotNum])
-					console.log(`chooseSlots[${i}] : `, chooseSlots[i])
 					selectedChooseSlot = undefined
-
-					console.log('selectedChooseSlot: ', selectedChooseSlot)
 				}
-
 				if (selectedChooseSlot && selectedHandSlot) {
 					chooseSlots[selectedChooseSlot.slotNum] = selectedHandSlot.card;
 					handSlots[selectedHandSlot.slotNum] = selectedChooseSlot.card;
