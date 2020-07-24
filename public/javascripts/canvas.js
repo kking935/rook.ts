@@ -174,14 +174,14 @@ function draw() {
 		}
 		console.log('here')
 
-		if (selectedSlot && selectedSlot.card) { 
+		if (selectedHandSlot && selectedHandSlot.card) { 
 			console.log('inside 177')
 
-			console.log(selectedSlot)
-			if (selectedSlot.card.position.y > canvas.height * 0.7)
-				selectedSlot.card.position.y -= canvas.height * 0.01;
-			 // console.log('drawing selectedSlot.card ', selectedSlot.card);
-			drawCard(selectedSlot.card, 1) 
+			console.log(selectedHandSlot)
+			if (selectedHandSlot.card.position.y > canvas.height * 0.7)
+				selectedHandSlot.card.position.y -= canvas.height * 0.01;
+			 // console.log('drawing selectedHandSlot.card ', selectedHandSlot.card);
+			drawCard(selectedHandSlot.card, 1) 
 		}
 	}
 
@@ -244,7 +244,7 @@ function handleResize() {
 
 	if (handSlots) { setSlotsPosition(handSlots, handSlotsX, handSlotsY, handSlotsMulti) };
 	if (chooseSlots) { setSlotsPosition(chooseSlots, chooseSlotsX, chooseSlotsY, chooseSlotsMulti) };
-	if (selectedSlot) { setSlotsPosition(selectedSlot.card, selectedSlotX, selectedSlotY, selectedSlot.slotNum, 1) };
+	if (selectedHandSlot) { setSlotsPosition(selectedHandSlot.card, selectedHandSlotX, selectedHandSlotY, selectedHandSlot.slotNum, 1) };
 }
 
 ///////  isOn Helpers  \\\\\\\
@@ -326,6 +326,10 @@ function handleMouseDown(event) {
 	}
 }
 
+function selectNewHandSlot() {
+	
+}
+
 function handleMouseUp(event) {
 	 //  // if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
@@ -342,24 +346,24 @@ function handleMouseUp(event) {
 		for (var i in handSlots) {
 			console.log('at line 341')
 
-			if (selectedSlot === undefined || selectedSlot.card === undefined && isOnSlot(event, handSlots[i])) {
+			if (selectedHandSlot === undefined || selectedHandSlot.card === undefined && isOnSlot(event, handSlots[i])) {
 				console.log('at line 343')
-				selectedSlot = {
+				selectedHandSlot = {
 					slotNum: i,
 					card: handSlots[i],
 				}
-				console.log(' new selectedSLot ', selectedSlot)
+				console.log(' new selectedSLot ', selectedHandSlot)
 				return;
 			} else if (isOnSlot(event, handSlots[i])) {
 				console.log('swap card : ', handSlots[i])
 				console.log('slot: ', i)
 				const swapCard = handSlots[i]
-				handSlots[i] = selectedSlot.card;
-				handSlots[selectedSlot.slotNum] = swapCard
-				selectedSlot = {
-					slotNum: undefined,
-					card: undefined
-				};
+				console.log('swapCard: ', swapCard)
+				handSlots[i] = selectedHandSlot.card;
+				handSlots[selectedHandSlot.slotNum] = swapCard
+				console.log('handSlots[selectedHandSlot.slotNum]: ', handSlots[selectedHandSlot.slotNum])
+				selectedHandSlot = {undefined};
+				handleResize();
 				return;
 			}
 		}
@@ -372,13 +376,13 @@ function handleMouseUp(event) {
 			console.log('here at 366')
 			if (canChooseCards && isOnSlot(event, chooseSlots[i])) {
 				console.log('here at 368')
-				console.log(selectedSlot)
-				if (selectedSlot.card) {
-					console.log('selected slot : ', selectedSlot)
-					const discardCard = selectedSlot.card;
-					handSlots[selectedSlot.slotNum] = chooseSlots[i];
+				console.log(selectedHandSlot)
+				if (selectedHandSlot.card) {
+					console.log('selected slot : ', selectedHandSlot)
+					const discardCard = selectedHandSlot.card;
+					handSlots[selectedHandSlot.slotNum] = chooseSlots[i];
 					chooseSlots[i] = discardCard;
-					selectedSlot = undefined;
+					selectedHandSlot = undefined;
 					return;
 				} 
 			}
@@ -537,9 +541,9 @@ var canvas,
 
 	trumps = 'None',
 
-	selectedSlot = {undefined},
-	selectedSlotX = 0.05,
-	selectedSlotY = 0.8,
+	selectedHandSlot = undefined,
+	selectedHandSlotX = 0.05,
+	selectedHandSlotY = 0.8,
 
 	circuitPile = undefined;
 
