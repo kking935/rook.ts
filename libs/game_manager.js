@@ -414,10 +414,13 @@ function setTrumps(socket, newTrumps) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	var match = findMatchBySocketId(socket.id);
+	var player = findPlayerById(socket.id);
+	
 	match.round.trumps = newTrumps;
 
 	io.to(match.matchId).emit("start round with trumps", newTrumps);
 
+	match.round.circuit.turnToPlay = player.turn
 	handleTurn(match);
 }
 
@@ -436,7 +439,7 @@ function playCard(socket, index) {
 		}
 
 		var player = findPlayerById(socket.id);
-		var isTurn = player.turn === match.round.ciruit.turnToPlay;
+		var isTurn = player.turn === match.round.circuit.turnToPlay;
 		var isValidIndex = index >= 0 && index < player.cards.length;
 		var cardExists = player.cards[index] !== undefined;
 
@@ -517,7 +520,7 @@ function processCircuit(match) {
 		}
 	}
 
-	match.round.ciruit.currentLeader.team.points += totalPoints;
+	match.round.circuit.currentLeader.team.points += totalPoints;
 
 	io.to(match.matchId).emit("circuit winners", match.round.circuit.currentLeader.team);
 
