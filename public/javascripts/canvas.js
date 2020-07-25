@@ -31,6 +31,15 @@ function turnOnClickableLabels(labelsList) {
 	}
 }
 
+function addToCircuitPile(card, slot) {
+	console.log(circuitPile)
+	circuitPile[slot].number = card.number;
+	circuitPile[slot].color = card.color
+
+	console.log(circuitPile)
+	handleResize();
+}
+
 function turnOnLabels(labelsList) {
 	// console.log('-------------- Turning on labels -----------------')
 
@@ -104,6 +113,8 @@ function drawCard(card, scale) {
 		scale = 1;
 	}
 
+	if (card.number === undefined)
+	console.log('drawing card ', card)
 
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
@@ -140,9 +151,9 @@ function drawUnknownCard(position, scale) {
 	ctx.fillText("?", position.x + cardWidth * scale / 2, position.y + cardHeight * 0.5 * scale);
 }
 
-function drawEmptySlot(slotNum) {
-	var x = canvas.width * handSlotsX + canvas.width / handSlots.length * slotNum - cardWidth / 2;
-	var y = canvas.height * handSlotsY;
+function drawEmptySlot(slotNum, x, y, slots) {
+	var x = canvas.width * x + canvas.width / slots.length * slotNum - cardWidth / 2;
+	var y = canvas.height * y;
 
 	ctx.fillStyle = "#a0a0a0";
 	ctx.fillRect(x, y, cardWidth, cardHeight);
@@ -172,14 +183,26 @@ function drawLabel(label) {
 function draw() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
+	if (displayPile) {
+		for (var i in circuitPile) {
+			if (circuitPile[i] && circuitPile[i].number && circuitPile[i].color) {
+				console.log('drawing play card', i)
+				drawCard(circuitPile[i], 1)
+			} else {
+				console.log('drawing empty slot for play cards')
+				drawEmptySlot(i, circuitPileX, circuitPileY, circuitPile)
+			}
+		}
+	}
+
 	 // console.log('displayCardSlots ',  displayCardSlots)
 	if (displayCardSlots) {
 		for (var i in handSlots) {
-			if (handSlots[i] && handSlots[i].number) { 
+			if (handSlots[i] && handSlots[i].number && handSlots[i].color) { 
 				 // console.log('drawing handslot ', handSlots[i]);
 				drawCard(handSlots[i], 1) 
 			} else {
-				drawEmptySlot(i)
+				drawEmptySlot(i, handSlotsX, handSlotsY, handSlots)
 			}
 		}
 		// console.log('here')
@@ -198,9 +221,9 @@ function draw() {
 	 // console.log('displayChooseSlots ',  displayChooseSlots)
 	if (displayChooseSlots) {
 		for (var i in chooseSlots) {
-			console.log('is display slot equal to i ', displaySlot === i)
+			// console.log('is display slot equal to i ', displaySlot === i)
 			if (canChooseCards || (displaySlot == i)) {
-				console.log('also at choose slot ', i)
+				// console.log('also at choose slot ', i)
 
 				 // console.log('drawing chooseSlots[i] ', chooseSlots[i]);
 				drawCard(chooseSlots[i], 1);
@@ -220,12 +243,12 @@ function draw() {
 
 	 // console.log('circuitPile ',  !!circuitPile)
 
-	if (circuitPile) {
-		for (var i in circuitPile) {
-			 // console.log('drawing circuitPile[i] ', circuitPile[i])
-			drawCard(circuitPile[i], 1);
-		}
-	}
+	// if (circuitPile) {
+	// 	for (var i in circuitPile) {
+	// 		 // console.log('drawing circuitPile[i] ', circuitPile[i])
+	// 		drawCard(circuitPile[i], 1);
+	// 	}
+	// }
 
 	for (var i in labels) {
 		if (labels[i].visible) {
@@ -265,7 +288,7 @@ function handleResize() {
 	if (chooseSlots) { setSlotsPosition(chooseSlots, chooseSlotsX, chooseSlotsY, chooseSlotsMulti) };
 	if (selectedHandSlot) { setSlotsPosition(selectedHandSlot.card, handSlotsX, handSlotsY, selectedHandSlot.slotNum, 1) };
 	if (selectedChooseSlot) { setSlotsPosition(selectedChooseSlot.card, chooseSlotsX, chooseSlotsY, selectedChooseSlot.slotNum, 1) };
-
+	if (circuitPile) { setSlotsPosition(circuitPile, circuitPileX, circuitPileY, 1)}
 }
 
 ///////  isOn Helpers  \\\\\\\
@@ -503,7 +526,6 @@ function init() {
 	labels["Green"] = new Label(secondaryColor, toColor("Green"), {x: 0.6, y: 0.3}, "Green", 50, false, true, false, labelFont, chooseGreenTrumps);
 	labels["Black"] = new Label(secondaryColor, toColor("Black"), {x: 0.8, y: 0.3}, "Black", 50, false, true, false, labelFont, chooseBlackTrumps);
 	labels["submitTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.675}, "Choose Trumps", 50, false, false, false, labelFont, submitTrumps)
-	labels["trumps"] = new Label(secondaryColor, secondaryColor, {x: 0.9, y: 0.05}, `Trumps: ${trumps}`, 30, false, false, false, labelFont);
 
 	labels["playerChoosingCards"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing their cards   ", 55, false, false, false, labelFont);
 	labels["playerChoosingTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Bet winner is choosing trumps   ", 55, false, false, false, labelFont);
@@ -511,6 +533,17 @@ function init() {
 	labels["waitingToPlay"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Waiting to play   ", 55, false, false, false, labelFont);
 	labels["yourTurn"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Your Turn   ", 55, false, false, false, labelFont);
 	labels["submitSelectedCard"] = new Label(primaryColor, secondaryColor, {x: 0.87, y: 0.65}, "Play Card", 40, false, false, false, labelFont, submitSelectedCard);
+
+	// labels["round"] = new Label(primaryColor, secondaryColor, {x: 0.95, y: 0.05}, "Round: 0", 20, false, false, false, labelFont);
+	labels["trumps"] = new Label(secondaryColor, secondaryColor, {x: 0.9, y: 0.05}, `Trumps: ${trumps}`, 30, false, false, false, labelFont);
+	
+	// labels['roundTeamPoints'] = new Label(secondaryColor, toColor("Green"), {x: 0.9, y: 0.15}, "Round Points: 0", 20, false, false, false, labelFont)
+	// labels['goalRoundTeamPoints'] = new Label(secondaryColor, toColor("Green"), {x: 0.9, y: 0.2}, "Round Goal: 0", 20, false, false, false, labelFont)
+	// labels['totalTeamPoints'] = new Label(secondaryColor, toColor("Green"), {x: 0.9, y: 0.25}, "Match Points: 0", 20, false, false, false, labelFont)
+	
+	// labels['roundOpponentPoints'] = new Label(secondaryColor, toColor("Red"), {x: 0.1, y: 0.15}, "Round Points: 0", 20, false, false, false, labelFont)
+	// labels['goalRoundOpponentPoints'] = new Label(secondaryColor, toColor("Red"), {x: 0.1, y: 0.2}, "Round Goal: 0", 20, false, false, false, labelFont)
+	// labels['totalOpponentPoints'] = new Label(secondaryColor, toColor("Red"), {x: 0.1, y: 0.25}, "Match Points: 0", 20, false, false, false, labelFont)
 
 	this.dottedLabels = [
 		labels["waiting"], 
@@ -581,6 +614,9 @@ var canvas,
 	selectedHandSlot = undefined,
 	selectedChooseSlot = undefined,
 
+	circuitPileX = 0.2,
+	circuitPileY = 0.35,
+	displayPile = false,
 	circuitPile = undefined;
 
 init();

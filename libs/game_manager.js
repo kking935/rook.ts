@@ -12,7 +12,7 @@ var matches = [];
 var rematchRequests = [];
 
 var goalPoints = 500;
-const teamSize = 1;
+const teamSize = 2;
 const numTeams = 2;
 const handSize = 10;
 const potSize = 5;
@@ -235,9 +235,10 @@ function createRound(roundNumber, deck) {
 
 function createCircuit() {
 	var newCircuit = {
+		number: 0,							// The circuit number
 		cardPile: [],						// The current pile of cards
 		bestCard: {number: -1, color: 'none'},	// The current greatest card value
-		currentLeader: undefined,			// Player with the best card in this round's pile
+		currentLeader: 0,					// Player with the best card in this round's pile
 		turnToPlay: 0,						// Which player's turn it is
 	}
 	return newCircuit;
@@ -431,14 +432,18 @@ function setTrumps(socket, newTrumps) {
 	
 	match.round.trumps = newTrumps;
 
-	io.to(match.matchId).emit("start round with trumps", newTrumps);
+	io.to(match.matchId).emit("start round with trumps", newTrumps, match.players.length);
 
-	match.round.circuit.turnToPlay = player.turn
-	match.round.circuit.endTurn = player.turn - 1;
-	if (match.round.circuit.endTurn < 0) {
-		match.round.circuit.endTurn = match.players.length - 1
-	}
-	handleTurn(match);
+	setTurns(match, player)
+
+	// handleTurn(match);
+}
+
+function setTurns(match, player) {
+	match.round.circuit.currentLeader = player
+	player.socket.emit("turn play on");
+	match.round.circuit.turnToPlay = player.turn;
+	match.round.circuit.endTurn = player.turn;
 }
 
 /**
@@ -452,10 +457,6 @@ function playCard(socket, index) {
 	console.log('playing card')
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
-		for (var z = 0;  z < match.players.length; z++){
-			// console.log("PlayerCARD : ", match.players[z].cards);
-		}
-
 		var player = findPlayerById(socket.id);
 		var isTurn = (player.turn === match.round.circuit.turnToPlay);
 		var isValidIndex = index >= 0 && index < player.cards.length;
@@ -465,11 +466,15 @@ function playCard(socket, index) {
 			console.log('about to fight cards')
 			player.currentCard = player.cards[index];
 			player.cards[index] = undefined;
+			console.log('at line 468')
 
 			if (fightCards(match, player.currentCard)) {
+				console.log('at 471')
 				match.round.circuit.bestCard = player.currentCard;
-				match.round.circuit.currentLeader = player.team;
+				match.round.circuit.currentLeader = player;
 			}
+			
+			io.to(match.matchId).emit('play card', player.currentCard, match.round.circuit.cardPile.length)
 
 			match.round.circuit.cardPile.push(player.currentCard);
 
@@ -487,15 +492,13 @@ function handleTurn(match) {
 
 	// console.log('in handle turn')
 	// console.log(match.round)
-	var turn = match.round.circuit.turnToPlay;
-	console.log('turn to play: ', turn)
+	console.log('turn to play: ', match.round.circuit.turnToPlay )
 
-	if (turn != match.round.circuit.endTurn) {
-		if (turn >= match.players.length) {
-			turn = 0;
+	if (match.round.circuit.turnToPlay != match.round.circuit.endTurn) {
+		if (match.round.circuit.turnToPlay >= match.players.length) {
 			match.round.circuit.turnToPlay = 0;
 		}
-		match.players[turn].socket.emit("turn play on");
+		match.players[match.round.circuit.turnToPlay].socket.emit("turn play on");
 	}
 	else {
 		processCircuit(match);
@@ -505,6 +508,7 @@ function handleTurn(match) {
 function fightCards(match, newCard) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
+	console.log('inside fight card')
 	var newCardWins = newCard.number > match.round.circuit.bestCard.number;
 
 	if (match.round.circuit.bestCard.color === match.round.trumps && newCard.color != match.round.trumps) {
@@ -544,9 +548,10 @@ function processCircuit(match) {
 		}
 	}
 
+	console.log('curr leader: ',match.round.circuit.currentLeader)
 	match.round.circuit.currentLeader.team.points += totalPoints;
 
-	io.to(match.matchId).emit("circuit winners", match.round.circuit.currentLeader.team);
+	io.to(match.matchId).emit("circuit winners", match.round.circuit.currentLeader.team, totalPoints);
 
 	match.round.circuit.number++;
 
@@ -555,6 +560,12 @@ function processCircuit(match) {
 	} else {
 		nextCircuit(match);
 	}
+}
+
+function nextCircuit(match) {
+	match.round.circuit.bestCard = {number: -1, color: 'none'}
+	match.round.circuit.cardPile = []					// Reset card pile
+	setTurns(match, match.round.circuit.currentLeader)	
 }
 
 
