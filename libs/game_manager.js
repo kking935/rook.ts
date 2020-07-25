@@ -12,9 +12,9 @@ var matches = [];
 var rematchRequests = [];
 
 var goalPoints = 500;
-const teamSize = 2;
+const teamSize = 1;
 const numTeams = 2;
-const handSize = 10;
+const handSize = 1;
 const potSize = 5;
 
 const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
@@ -60,9 +60,9 @@ module.exports.listen = function(app) {
 			setTrumps(socket, newTrumps);
 		})
 
-		socket.on("play card", function(index) {
-			console.log('play card')
-			playCard(socket, index);
+		socket.on("play card", function(card) {
+			// console.log('play card')
+			playCard(socket, card);
 		});
 
 		socket.on("leave match", function() {
@@ -196,7 +196,8 @@ function createMatch(participants) {
 		round: createRound(0, newDeck),
 		players: newPlayers,
 		teams: newTeams,
-		isOver: false
+		isOver: false,
+		gameSize: participants.length
 	};
 
 	for (var z = 0;  z < participants.length; z++){
@@ -240,6 +241,7 @@ function createCircuit() {
 		bestCard: {number: -1, color: 'none'},	// The current greatest card value
 		currentLeader: 0,					// Player with the best card in this round's pile
 		turnToPlay: 0,						// Which player's turn it is
+		endTurn: 0
 	}
 	return newCircuit;
 }
@@ -432,7 +434,7 @@ function setTrumps(socket, newTrumps) {
 	
 	match.round.trumps = newTrumps;
 
-	io.to(match.matchId).emit("start round with trumps", newTrumps, match.players.length);
+	io.to(match.matchId).emit("start round with trumps", newTrumps, match.gameSize);
 
 	setTurns(match, player)
 
@@ -443,7 +445,7 @@ function setTurns(match, player) {
 	match.round.circuit.currentLeader = player
 	player.socket.emit("turn play on");
 	match.round.circuit.turnToPlay = player.turn;
-	match.round.circuit.endTurn = player.turn;
+	match.round.circuit.endTurn = match.players.length;
 }
 
 /**
@@ -451,37 +453,35 @@ function setTurns(match, player) {
  * @param socket 	The socket of the player to play a card for
  * @param index 	The index in the card array of the player's hand
  */
-function playCard(socket, index) {
-	console.log('here')
+function playCard(socket, card) {
+	// console.log('here')
 	// if (logFull) // console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	console.log('playing card')
+	// console.lo('playing card')
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
+		console.log('playing card')
 		var player = findPlayerById(socket.id);
 		var isTurn = (player.turn === match.round.circuit.turnToPlay);
-		var isValidIndex = index >= 0 && index < player.cards.length;
-		var cardExists = player.cards[index] !== undefined;
+		var cardExists = card !== undefined;
 
-		if (isTurn && isValidIndex && cardExists && !player.currentCard) {
+		if (isTurn && cardExists) {
 			console.log('about to fight cards')
-			player.currentCard = player.cards[index];
-			player.cards[index] = undefined;
-			console.log('at line 468')
+			// console.log('at line 468')
 
-			if (fightCards(match, player.currentCard)) {
-				console.log('at 471')
-				match.round.circuit.bestCard = player.currentCard;
+			if (fightCards(match, card)) {
+				// console.log('at 471')
+				match.round.circuit.bestCard = card;
 				match.round.circuit.currentLeader = player;
 			}
 			
-			io.to(match.matchId).emit('play card', player.currentCard, match.round.circuit.cardPile.length)
+			io.to(match.matchId).emit('play card', card, match.round.circuit.cardPile.length)
 
-			match.round.circuit.cardPile.push(player.currentCard);
+			match.round.circuit.cardPile.push(card);
 
 			match.round.circuit.turnToPlay++;
+			match.round.circuit.endTurn--;
 
-
-			console.log('about to handle turn', match.round.circuit.turnToPlay)
+			// console.log('about to handle turn', match.round.circuit.turnToPlay)
 			handleTurn(match);
 		}
 	}
@@ -490,14 +490,15 @@ function playCard(socket, index) {
 function handleTurn(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
-	// console.log('in handle turn')
+	console.log('in handle turn')
 	// console.log(match.round)
-	console.log('turn to play: ', match.round.circuit.turnToPlay )
+	// console.log('turn to play: ', match.round.circuit.turnToPlay )
 
-	if (match.round.circuit.turnToPlay != match.round.circuit.endTurn) {
+	if (match.round.circuit.endTurn > 0) {
 		if (match.round.circuit.turnToPlay >= match.players.length) {
 			match.round.circuit.turnToPlay = 0;
 		}
+		console.log('telling player to play ', match.round.circuit.turnToPlay)
 		match.players[match.round.circuit.turnToPlay].socket.emit("turn play on");
 	}
 	else {
@@ -508,11 +509,27 @@ function handleTurn(match) {
 function fightCards(match, newCard) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
-	console.log('inside fight card')
-	var newCardWins = newCard.number > match.round.circuit.bestCard.number;
+	console.log('new card: ', newCard)
+	console.log('current best: ', match.round.circuit.bestCard)
+	// console.log('inside fight card')
+	var newCardWins = false;
+	if (newCard.number > match.round.circuit.bestCard.number || newCard.number === 1){
+		newCardWins = true;
+	}
 
-	if (match.round.circuit.bestCard.color === match.round.trumps && newCard.color != match.round.trumps) {
+	var newCardIsTrumps = (newCard.color === match.round.trumps) || (newCard.color === "ROOK")
+	var currCardIsTrumps = (match.round.circuit.bestCard.color === match.round.trumps) || (match.round.circuit.bestCard.color === "ROOK")
+	
+	if (currCardIsTrumps && !newCardIsTrumps) {
 		newCardWins = false;
+	}
+	else if (!currCardIsTrumps && newCardIsTrumps) {
+		newCardWins = true;
+	} 
+	else if (!currCardIsTrumps && !newCardIsTrumps) {
+		if (match.round.circuit.bestCard.color != 'none' && match.round.circuit.bestCard.color != newCard.color) {
+			newCardWins = false;
+		}
 	}
 
 	return newCardWins;
@@ -527,10 +544,11 @@ function fightCards(match, newCard) {
 function processCircuit(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
+	console.log('processing circuit')
 	var totalPoints = 0;
 	for (var card = 0; card < match.round.circuit.cardPile.length; card++) {
 		switch(match.round.circuit.cardPile[card].number) {
-			case "rook":
+			case 20:
 				totalPoints += 20;
 				break;
 			case 1:
@@ -548,26 +566,31 @@ function processCircuit(match) {
 		}
 	}
 
-	console.log('curr leader: ',match.round.circuit.currentLeader)
+	// console.log('curr leader: ',match.round.circuit.currentLeader)
 	match.round.circuit.currentLeader.team.points += totalPoints;
 
+	console.log('circuit winners')
 	io.to(match.matchId).emit("circuit winners", match.round.circuit.currentLeader.team, totalPoints);
+
 
 	match.round.circuit.number++;
 
-	if (match.round.circuit.number === handSize) {
-		processRound(match);
-	} else {
-		nextCircuit(match);
-	}
+	console.log('circuit number  : ', match.round.circuit.number, ' handsize ', handSize)
+	setTimeout(() => {
+		if (match.round.circuit.number == handSize) {
+			processRound(match);
+		} else {
+			nextCircuit(match);
+		}
+	}, 5000);
 }
 
 function nextCircuit(match) {
+	io.to(match.matchId).emit('new circuit')
 	match.round.circuit.bestCard = {number: -1, color: 'none'}
 	match.round.circuit.cardPile = []					// Reset card pile
-	setTurns(match, match.round.circuit.currentLeader)	
+	setTimeout(() => setTurns(match, match.round.circuit.currentLeader), 6000)
 }
-
 
 /**
  * Processes the end of each round, determining who won
@@ -577,7 +600,9 @@ function nextCircuit(match) {
  */
 function processRound(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
+	
+	console.log('processing round')
+	
 	if (match.round.bet <= match.round.roundBetter.team.roundPoints) {
 		match.round.roundBetter.team.matchPoints += match.round.roundBetter.team.roundPoints;
 	}
@@ -588,6 +613,7 @@ function processRound(match) {
 	if (match.round.roundBetter.team.points >= goalPoints) {
 		endMatch(match, match.round.roundBetter.team, "set");
 	} else {
+		console.log('next round')
 		io.to(match.matchId).emit("round winners", match.round.roundBetter.team);
 		nextRound(match);
 	}
@@ -599,20 +625,29 @@ function processRound(match) {
  */
 function nextRound(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
+
+	match.deck = shuffleDeck(generateDeck())
+	match.round = createRound(match.round.number + 1, match.deck)
+
 	for (var i = 0; i < match.players.length; i++) {
-		match.players[i].currentCard = undefined;
 		for (var j = 0; j < match.players[i].cards.length; j++) {
 			if (match.players[i].cards[j] === undefined) {
 				match.players[i].cards[j] = drawCard(match.deck);
 			}
 		}
+		match.players[i].socket.emit('update cards', match.players[i].cards)
 	}
 
-	match.round.number++;
-	match.round.turnToBet = 0;
-
-	handleTurn(match)
+	var slot = 0;
+	if (match.players.length === 6) {
+		slot = -1;
+	}
+	// io.to(match.matchId).emit('new circuit')
+	setTimeout(() => io.to(match.matchId).emit('new round'), 5000)
+	setTimeout(() => {
+		io.to(match.matchId).emit("update choose cards", match.round.pot, slot);
+		callBet(match)
+	}, 6000)
 }
 
 /**
