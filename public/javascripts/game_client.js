@@ -254,7 +254,7 @@ function startRoundWithTrumps(newTrumps){
 
 function submitSelectedCard() {
 	if (canPlayCard && selectedHandSlot) {
-		socket.emit('play card', selectedHandSlot)
+		socket.emit('play card', selectedHandSlot.slotNum)
 		disableLabels(['submitSelectedCard'])
 		handSlots[selectedHandSlot.slotNum].number = undefined;
 		handSlots[selectedHandSlot.slotNum].color = undefined;
