@@ -245,7 +245,7 @@ function submitTrumps() {
 }
 
 function startRoundWithTrumps(newTrumps){
-	turnOffLabels(['playerChoosingTrumps'])
+	turnOffLabels(['playerChoosingTrumps', 'submitSelectedCard'])
 	trumps = newTrumps
 	updateTrumps()
 	turnOnLabels(['trumps', 'waitingToPlay'])
@@ -253,20 +253,24 @@ function startRoundWithTrumps(newTrumps){
 }
 
 function submitSelectedCard() {
-	if (canPlayCard && selectedSlot) {
-		socket.emit('play card', selectedSlot)
+	if (canPlayCard && selectedHandSlot) {
+		socket.emit('play card', selectedHandSlot)
+		handSlots[selectedHandSlot.slotNum] = undefined;
+		selectedHandSlot.card = undefined;
 	}
 }
 
 function turnOnPlay(){
 	canPlayCard = true;
 	turnOffLabels(['waitingToPlay'])
-	turnOnLabels(['yourTurn'])
-	turnOnClickableLabels(['submitSelectedCard'])
+	turnOnLabels(['yourTurn', 'submitSelectedCard'])
+	disableLabels(['submitSelectedCard'])
 }
 
 function turnOffPlay(){
 	canPlayCard = false;
+	disableLabels(['submitSelectedCard'])
+	turnOffLabels(['submitSelectedCard'])
 }
 
 function playCard(index) {

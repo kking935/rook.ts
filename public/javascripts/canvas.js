@@ -47,7 +47,14 @@ function disableLabels(labelsList) {
 		// console.log("Disabling labels: ", labels[`${labelsList[i]}`])
 		labels[`${labelsList[i]}`].disabled = true;
 		labels[`${labelsList[i]}`].clickable = false;
-		labels[`${labelsList[i]}`].visible = true;
+	}
+}
+
+function enableLabels(labelsList) {
+
+	for (var i in labelsList) {
+		labels[`${labelsList[i]}`].disabled = false;
+		labels[`${labelsList[i]}`].clickable = true;
 	}
 }
 
@@ -133,11 +140,14 @@ function drawUnknownCard(position, scale) {
 	ctx.fillText("?", position.x + cardWidth * scale / 2, position.y + cardHeight * 0.5 * scale);
 }
 
-function drawEmptySlot(slot) {
+function drawEmptySlot(slotNum) {
+	var x = canvas.width * handSlotsX + canvas.width / handSlots.length * slotNum - cardWidth / 2;
+	var y = canvas.height * handSlotsY;
+
 	ctx.fillStyle = "#a0a0a0";
-	ctx.fillRect(slot.position.x, slot.position.y, cardWidth, cardHeight);
+	ctx.fillRect(x, y, cardWidth, cardHeight);
 	ctx.strokeStyle = "#000000";
-	ctx.strokeRect(slot.position.x, slot.position.y, cardWidth, cardHeight);
+	ctx.strokeRect(x, y, cardWidth, cardHeight);
 }
 
 function drawLabel(label) {
@@ -368,11 +378,13 @@ function handleMouseUp(event) {
 							card: handSlots[i],
 						}
 					}
+					enableLabels(["submitSelectedCard"])
 				} else {
 					const swapCard = handSlots[i]
 					handSlots[i] = selectedHandSlot.card;
 					handSlots[selectedHandSlot.slotNum] = swapCard
 					selectedHandSlot = undefined;
+					disableLabels(["submitSelectedCard"])
 				}
 				handleResize();
 				return;
