@@ -26,8 +26,12 @@ socket.on("update cards", function(cards) {
 	updateCards(cards);
 });
 
-socket.on("enter match", function(team, cards) {
+socket.on("enter match", function(team) {
 	enterMatch(team);
+});
+
+socket.on("update choose cards", function(cards, slot) {
+	updateChooseCards(cards, slot);
 });
 
 socket.on("update current bet", function(newBet, bettingTeamId) {
@@ -45,10 +49,6 @@ socket.on("end betting", function() {
 socket.on("turn on choose cards", function() {
 	turnOnChooseSlots();
 })
-
-socket.on("update choose cards", function(cards) {
-	updateChooseCards(cards);
-});
 
 socket.on("turn on choose trumps", function() {
 	turnOnChooseTrumps()
@@ -181,13 +181,16 @@ function handlePass() {
    }
 }
 
-function updateChooseCards(cards) {
+function updateChooseCards(cards, slot) {
 	// // if (logFull) // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
+	this.displaySlot = slot
+
+	console.log(displaySlot)
+
 	chooseSlots = [cards.length];
 
 	for (var i = 0; i < cards.length; i++) {
-		[i].position = {
+		cards[i].position = {
 			x: chooseSlotsX,
 			y: chooseSlotsY
 		}

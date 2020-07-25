@@ -156,6 +156,13 @@ function leaveQueue(socket) {
 function createMatch(participants) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
+
+	if (participants.length === 6) {
+		this.potSize = 3;
+	} else {
+		this.potSize = 5;
+	}
+
 	var id = createId();
 	var newDeck = shuffleDeck(generateDeck());
 	var newPlayers = [];
@@ -201,7 +208,12 @@ function createMatch(participants) {
 		players[x].socket.emit("enter match", players[x].team);
 	}
 
-	io.to(match.matchId).emit("update choose cards", match.round.pot);
+	var slot = 0;
+	if (match.players.length === 6) {
+		slot = -1;
+	}
+
+	io.to(match.matchId).emit("update choose cards", match.round.pot, slot);
 
 	callBet(match);
 }

@@ -188,7 +188,10 @@ function draw() {
 	 // console.log('displayChooseSlots ',  displayChooseSlots)
 	if (displayChooseSlots) {
 		for (var i in chooseSlots) {
-			if (canChooseCards) {
+			console.log('is display slot equal to i ', displaySlot === i)
+			if (canChooseCards || (displaySlot == i)) {
+				console.log('also at choose slot ', i)
+
 				 // console.log('drawing chooseSlots[i] ', chooseSlots[i]);
 				drawCard(chooseSlots[i], 1);
 			} else {
@@ -555,6 +558,7 @@ var canvas,
 	chooseSlotsMulti = 0.55,
 	displayChooseSlots = false,
 
+	displaySlot = undefined,
 	trumps = 'None',
 
 	selectedHandSlot = undefined,
