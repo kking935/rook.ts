@@ -12,7 +12,7 @@ var matches = [];
 var rematchRequests = [];
 
 var goalPoints = 500;
-const teamSize = 1;
+const teamSize = 2;
 const numTeams = 2;
 const handSize = 1;
 const potSize = 5;
@@ -181,7 +181,6 @@ function createMatch(participants) {
 			team: newTeams[Math.floor(participant % numTeams)],
 			turn: participant,
 			cards: dealHand(newDeck, handSize),
-			currentCard: undefined
 		};
 
 		newPlayers.push(playerObject);
@@ -626,25 +625,22 @@ function processRound(match) {
 function nextRound(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
-	match.deck = shuffleDeck(generateDeck())
-	match.round = createRound(match.round.number + 1, match.deck)
-
-	for (var i = 0; i < match.players.length; i++) {
-		for (var j = 0; j < match.players[i].cards.length; j++) {
-			if (match.players[i].cards[j] === undefined) {
-				match.players[i].cards[j] = drawCard(match.deck);
-			}
-		}
-		match.players[i].socket.emit('update cards', match.players[i].cards)
-	}
-
-	var slot = 0;
-	if (match.players.length === 6) {
-		slot = -1;
-	}
-	// io.to(match.matchId).emit('new circuit')
 	setTimeout(() => io.to(match.matchId).emit('new round'), 5000)
+
+	// io.to(match.matchId).emit('new circuit')
 	setTimeout(() => {
+		match.deck = shuffleDeck(generateDeck())
+		match.round = createRound(match.round.number + 1, match.deck)
+	
+		for (var i = 0; i < match.players.length; i++) {
+			match.players[i].cards = dealHand(match.deck, handSize);
+			match.players[i].socket.emit('update cards', match.players[i].cards)
+		}
+	
+		var slot = 0;
+		if (match.players.length === 6) {
+			slot = -1;
+		}
 		io.to(match.matchId).emit("update choose cards", match.round.pot, slot);
 		callBet(match)
 	}, 6000)

@@ -147,7 +147,7 @@ function enterMatch(newTeam) {
 
 function updateCards(cards) {
 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
+	handSlots = undefined;
 	handSlots = [cards.length];
 
 	for (var i = 0; i < cards.length; i++) {
