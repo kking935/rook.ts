@@ -147,7 +147,7 @@ function enterQueueSix() {
 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	socket.emit("enter queue six");
-	turnOffLabels(["twoPlayrs", "fourPlayers", "sixPlayers"])
+	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
 	turnOnLabels(["searching"])
 }
 
