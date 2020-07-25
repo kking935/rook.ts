@@ -175,7 +175,7 @@ function draw() {
 	 // console.log('displayCardSlots ',  displayCardSlots)
 	if (displayCardSlots) {
 		for (var i in handSlots) {
-			if (handSlots[i]) { 
+			if (handSlots[i] && handSlots[i].number) { 
 				 // console.log('drawing handslot ', handSlots[i]);
 				drawCard(handSlots[i], 1) 
 			} else {
@@ -239,7 +239,7 @@ function draw() {
 function setSlotsPosition(slots, x, y, multiplyer) {
 	for (var i in slots) {
 		 // console.log('setting x ',canvas.width * x + canvas.width / slots.length * i * multiplyer - cardWidth / 2 )
-		slots[i].position = {
+		 slots[i].position = {
 			x: canvas.width * x + canvas.width / slots.length * i * multiplyer - cardWidth / 2,
 			y: canvas.height * y
 		};
@@ -373,10 +373,14 @@ function handleMouseUp(event) {
 						selectedChooseSlot = undefined
 					}
 					else {
-						selectedHandSlot = {
-							slotNum: i,
-							card: handSlots[i],
+						if (handSlots[i].number && handSlots[i].color) {
+							selectedHandSlot = {
+								slotNum: i,
+								card: handSlots[i],
+							} 
 						}
+						else { return }
+
 					}
 					enableLabels(["submitSelectedCard"])
 				} else {
