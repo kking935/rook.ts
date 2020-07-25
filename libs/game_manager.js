@@ -507,7 +507,7 @@ function fightCards(match, newCard) {
 
 	var newCardWins = newCard.number > match.round.circuit.bestCard.number;
 
-	if (match.round.circuit.bestCard.color === match.round.trumps && newCard.color != trumps) {
+	if (match.round.circuit.bestCard.color === match.round.trumps && newCard.color != match.round.trumps) {
 		newCardWins = false;
 	}
 

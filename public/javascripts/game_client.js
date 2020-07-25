@@ -256,13 +256,20 @@ function submitSelectedCard() {
 	if (canPlayCard && selectedHandSlot) {
 		socket.emit('play card', selectedHandSlot.slotNum)
 		disableLabels(['submitSelectedCard'])
+		turnOffLabels(['yourTurn'])
+		turnOnLabels(['waitingToPlay'])
 		handSlots[selectedHandSlot.slotNum].number = undefined;
 		handSlots[selectedHandSlot.slotNum].color = undefined;
 		selectedHandSlot= undefined;
+		console.log('turning off play')
+
+		canPlayCard = false;
+		disableLabels(['submitSelectedCard'])
 	}
 }
 
 function turnOnPlay(){
+	console.log('turning on play')
 	canPlayCard = true;
 	turnOffLabels(['waitingToPlay'])
 	turnOnLabels(['yourTurn', 'submitSelectedCard'])
@@ -270,6 +277,8 @@ function turnOnPlay(){
 }
 
 function turnOffPlay(){
+	console.log('turning off play')
+
 	canPlayCard = false;
 	disableLabels(['submitSelectedCard'])
 	turnOffLabels(['submitSelectedCard'])

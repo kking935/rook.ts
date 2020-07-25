@@ -182,12 +182,12 @@ function draw() {
 				drawEmptySlot(i)
 			}
 		}
-		console.log('here')
+		// console.log('here')
 
 		if (selectedHandSlot && selectedHandSlot.card) { 
-			console.log('inside 177')
+			// console.log('inside 177')
 
-			console.log(selectedHandSlot)
+			// console.log(selectedHandSlot)
 			if (selectedHandSlot.card.position.y > canvas.height * 0.7)
 				selectedHandSlot.card.position.y -= canvas.height * 0.01;
 			 // console.log('drawing selectedHandSlot.card ', selectedHandSlot.card);
@@ -382,7 +382,8 @@ function handleMouseUp(event) {
 						else { return }
 
 					}
-					enableLabels(["submitSelectedCard"])
+					if (canPlayCard)
+						enableLabels(["submitSelectedCard"])
 				} else {
 					const swapCard = handSlots[i]
 					handSlots[i] = selectedHandSlot.card;
