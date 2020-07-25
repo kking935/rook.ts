@@ -127,11 +127,27 @@ socket.on("no rematch", function() {
 });
 
 //////////  Functions  \\\\\\\\\\
-function enterQueue() {
+function enterQueueTwo() {
 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	socket.emit("enter queue");
-	turnOffLabels(["play"])
+	socket.emit("enter queue two");
+	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
+	turnOnLabels(["searching"])
+}
+
+function enterQueueFour() {
+	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
+	socket.emit("enter queue four");
+	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
+	turnOnLabels(["searching"])
+}
+
+function enterQueueSix() {
+	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
+	socket.emit("enter queue six");
+	turnOffLabels(["twoPlayrs", "fourPlayers", "sixPlayers"])
 	turnOnLabels(["searching"])
 }
 
@@ -466,7 +482,7 @@ function exitMatch() {
 
 	socket.emit("leave match");
 
-	turnOnClickableLabels(["play"])
+	turnOnClickableLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
 	turnOnLabels(["logo"])
 }
 

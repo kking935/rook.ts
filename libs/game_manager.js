@@ -7,14 +7,16 @@ var logFull = false;
 var logFull = false;
 
 var players = [];
-var queue = [];
+var queueTwo = [];
+var queueFour = [];
+var queueSix = [];
 var matches = [];
 var rematchRequests = [];
 
 var goalPoints = 500;
 const teamSize = 2;
 const numTeams = 2;
-const handSize = 1;
+// const handSize = 1;
 const potSize = 5;
 
 const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
@@ -36,8 +38,16 @@ module.exports.listen = function(app) {
 			playerDisconnected(socket);
 		});
 
-		socket.on("enter queue", function() {
-			enterQueue(socket);
+		socket.on("enter queue two", function() {
+			enterQueueTwo(socket);
+		});
+
+		socket.on("enter queue four", function() {
+			enterQueueFour(socket);
+		});
+
+		socket.on("enter queue six", function() {
+			enterQueueSix(socket);
 		});
 
 		socket.on("leave queue", function() {
@@ -117,20 +127,56 @@ function findPlayerById(socketId) {
  * Handles the event when a new player enters the queue (clicks on the play button to join a lobby)
  * @param socket	The socket of the player who entered the queue 
  */
-function enterQueue(socket) {
+function enterQueueTwo(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	var player = findPlayerById(socket.id);
-	if (queue.indexOf(player) === -1) {
-		queue.push(player);
+	if (queueTwo.indexOf(player) === -1) {
+		queueTwo.push(player);
 		socket.emit("queue entered");
-		if (queue.length >= numTeams * teamSize) {
+		if (queueTwo.length >= 2) {
 			var newPlayers = [];
-			var currentQueue = queue.length;
+			var currentQueue = queueTwo.length;
 			for (var x = 0; x < currentQueue ; x++) {
-				newPlayers.push(queue.shift())
+				newPlayers.push(queueTwo.shift())
 			}
-			createMatch(newPlayers);
+			createMatch(newPlayers, 5);
+		}
+	}
+}
+
+function enterQueueFour(socket) {
+	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
+	var player = findPlayerById(socket.id);
+	if (queueFour.indexOf(player) === -1) {
+		queueFour.push(player);
+		socket.emit("queue entered");
+		if (queueFour.length >= 4) {
+			var newPlayers = [];
+			var currentQueue = queueFour.length;
+			for (var x = 0; x < currentQueue ; x++) {
+				newPlayers.push(queueFour.shift())
+			}
+			createMatch(newPlayers, 10);
+		}
+	}
+}
+
+function enterQueueSix(socket) {
+	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
+	var player = findPlayerById(socket.id);
+	if (queueSix.indexOf(player) === -1) {
+		queueSix.push(player);
+		socket.emit("queue entered");
+		if (queueSix.length >= 6) {
+			var newPlayers = [];
+			var currentQueue = queueSix.length;
+			for (var x = 0; x < currentQueue ; x++) {
+				newPlayers.push(queueSix.shift())
+			}
+			createMatch(newPlayers, 7);
 		}
 	}
 }
@@ -143,9 +189,24 @@ function leaveQueue(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	var player = findPlayerById(socket.id);
-	var index = queue.indexOf(player);
+	var index = queueTwo.indexOf(player);
+	if (index > -1){
+		queueTwo.splice(index, 1)
+		index = -1
+	}
+	else {
+		index = queueFour.indexOf(player)
+	}
 	if (index > -1) {
-		queue.splice(index, 1);
+		queueFour.splice(index, 1)
+		index = -1
+	}
+	else {
+		index = queueSix.indexOf(player)
+	}
+	if (index > -1) {
+		queueSix.splice(index, 1);
+		index = -1
 	}
 	socket.emit("queue left");
 }
@@ -154,7 +215,7 @@ function leaveQueue(socket) {
  * Creates a new match for the teams of players passed in
  * @param  participants 	The participlants to create a match for
  */
-function createMatch(participants) {
+function createMatch(participants, handSize) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 
@@ -187,16 +248,15 @@ function createMatch(participants) {
 		participants[participant].socket.emit("update cards", playerObject.cards);
 	}
 
-	players = newPlayers;
-
 	var match = {
 		matchId: id,
 		deck: newDeck,
-		round: createRound(0, newDeck),
+		round: createRound(0, newDeck, newPlayers),
 		players: newPlayers,
 		teams: newTeams,
 		isOver: false,
-		gameSize: participants.length
+		gameSize: participants.length,
+		handSize: handSize
 	};
 
 	for (var z = 0;  z < participants.length; z++){
@@ -205,8 +265,8 @@ function createMatch(participants) {
 
 	matches.push(match);
 
-	for (var x = 0; x < players.length; x++) {
-		players[x].socket.emit("enter match", players[x].team);
+	for (var x = 0; x < match.players.length; x++) {
+		match.players[x].socket.emit("enter match", match.players[x].team);
 	}
 
 	var slot = 0;
@@ -219,14 +279,14 @@ function createMatch(participants) {
 	callBet(match);
 }
 
-function createRound(roundNumber, deck) {
+function createRound(roundNumber, deck, roundPlayers) {
 	var newRound = {
 		number: roundNumber,				// The round number
 		pot: dealHand(deck, potSize),		// The pot at the start of each round
 		turnToBet: 0,						// The turn for the bet
 		bet: 0,								// The bet for this round
 		roundBetter: undefined,				// The team that bet on this round
-		currentBetters: players.slice(0),			// Initialize the round's betters to be all the players
+		currentBetters: roundPlayers.slice(0),			// Initialize the round's betters to be all the players
 		trumps: undefined,					// The card color for trumps
 		circuit: createCircuit()				// The circuit of plays
 	}
@@ -574,9 +634,9 @@ function processCircuit(match) {
 
 	match.round.circuit.number++;
 
-	console.log('circuit number  : ', match.round.circuit.number, ' handsize ', handSize)
+	console.log('circuit number  : ', match.round.circuit.number, ' handsize ', match.handSize)
 	setTimeout(() => {
-		if (match.round.circuit.number == handSize) {
+		if (match.round.circuit.number == match.handSize) {
 			processRound(match);
 		} else {
 			nextCircuit(match);
@@ -630,10 +690,10 @@ function nextRound(match) {
 	// io.to(match.matchId).emit('new circuit')
 	setTimeout(() => {
 		match.deck = shuffleDeck(generateDeck())
-		match.round = createRound(match.round.number + 1, match.deck)
+		match.round = createRound(match.round.number + 1, match.deck, match.players)
 	
 		for (var i = 0; i < match.players.length; i++) {
-			match.players[i].cards = dealHand(match.deck, handSize);
+			match.players[i].cards = dealHand(match.deck, match.handSize);
 			match.players[i].socket.emit('update cards', match.players[i].cards)
 		}
 	

@@ -512,7 +512,10 @@ function init() {
 	handleResize();
 
 	labels["logo"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.3}, "ROOK", 192, true, false, false, "Arial");
-	labels["play"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.7}, "Play!", 144, true, true, false, labelFont, enterQueue);
+	labels["twoPlayers"] = new Label(primaryColor, secondaryColor, {x: 0.2, y: 0.6}, "Two Players", 50, true, true, false, labelFont, enterQueueTwo);
+	labels["fourPlayers"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.8}, "Four Players", 50, true, true, false, labelFont, enterQueueFour);
+	labels["sixPlayers"] = new Label(primaryColor, secondaryColor, {x: 0.8, y: 0.6}, "Six Players", 50, true, true, false, labelFont, enterQueueSix);
+
 	labels["waiting"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.62}, "Waiting   ", 128, false, false, false, labelFont);
 	labels["searching"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.7}, "Searching   ", 144, false, false, false, labelFont);
 	
