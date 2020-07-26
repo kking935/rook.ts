@@ -1,3 +1,7 @@
+* {
+    background-color: rgb(218, 218, 218);
+}
+
 canvas {
 	border: 1px solid black;
 	margin-top: 2vh;
@@ -9,15 +13,17 @@ canvas {
 }
 
 .page {
-    background-color: lightgray;
+    /* background-color: rgb(218, 218, 218); */
     padding: 50px 0px;
     min-height: 100vh;
 }
 
 @font-face {
-    font-family: "3ds";
+    font-family: 'rook-primary';
+    src: url('../fonts/drift_type/Drifttype\ Solid.ttf')
 }
 
 @font-face {
-    font-family: "3ds";
+    font-family: 'rook-secondary';
+    src: url('../fonts/drift_type/Drifttype.ttf')
 }
