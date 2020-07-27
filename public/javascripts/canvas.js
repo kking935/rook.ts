@@ -90,7 +90,7 @@ function toColor(colorStr) {
 		case "Green":
 			color = "#52a546";
 			break;
-		case "Blue":
+		case "ROOK":
 			color = "#246acd";
 			break;
 		case "Black":
@@ -98,9 +98,6 @@ function toColor(colorStr) {
 			break;
 		case "Red":
 			color = "#e02929";
-			break;
-		case "ROOK":
-			color = "#e02929"
 			break;
 		default:
 			color = "#000000"

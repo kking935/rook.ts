@@ -20,7 +20,7 @@ const numTeams = 2;
 const potSize = 5;
 
 const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
-const colors = ["Yellow", "Green", "Blue", "Black"];
+const colors = ["Yellow", "Green", "Red", "Black"];
 const rook = {
 	number: 20,
 	color: "ROOK"
@@ -276,6 +276,13 @@ function createMatch(participants, handSize) {
 
 	io.to(match.matchId).emit("update choose cards", match.round.pot, slot);
 
+	for (var i in newPlayers) {
+		for (var x in players) {
+			if (newPlayers[i].socket.id == players[x].socket.id) {
+				players[x] = newPlayers[i]
+			}
+		}
+	}
 	callBet(match);
 }
 
@@ -411,17 +418,22 @@ function findMatchBySocketId(socketId) {
  */
 function callBet(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	var turn = match.round.turnToBet;
 	if (turn < match.round.currentBetters.length && match.round.currentBetters.length != 1) {
+		console.log('the turn is ', turn)
 		match.round.currentBetters[turn].socket.emit("turn on bet");
 	}
 	else if (match.round.currentBetters.length > 1) {
 		match.round.turnToBet = 0;
+		console.log('reseting turn to bet back to 0')
+
 		callBet(match);
 	}
 	else {
-		// console.log('here')
+		console.log('here')
 		match.round.roundBetter = match.round.currentBetters[0];
+		// console.log(match.round.roundBetter)
 		io.to(match.matchId).emit("end betting");
 		startRound(match);
 	}
@@ -450,7 +462,7 @@ function handlePass(socket) {
 	var match = findMatchBySocketId(socket.id);
 	var player = findPlayerById(socket.id);
 
-	match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);	
+	match.round.currentBetters = match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);	
 	callBet(match);
 }
 
@@ -458,6 +470,7 @@ function startRound(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	for (var i = 0; i < match.players.length; i++) {
+		// console.log(match.players[i])
 		if (match.players[i] === match.round.roundBetter ) {
 			match.round.roundBetter.socket.emit('turn on choose cards');
 		}
@@ -472,16 +485,18 @@ function updateChosenCards(socket, cards) {
 
 	var match = findMatchBySocketId(socket.id)
 	var player = findPlayerById(socket.id);
-	player.cards = cards;
 
 	for (var i = 0; i < match.players.length; i++) {
-		if (match.players[i] === player) {
+		console.log(i)
+		if (match.players[i].socket == socket) {
+			console.log('calling turn on choose trumps')
 			match.players[i].socket.emit("turn on choose trumps");
 		} else {
 			// console.log('emitting waitingo on better to choose trumps')
 			match.players[i].socket.emit("waiting on bet winner to choose trumps")
 		}
 	}
+	player.cards = cards;
 
 }
 
@@ -495,15 +510,19 @@ function setTrumps(socket, newTrumps) {
 
 	io.to(match.matchId).emit("start round with trumps", newTrumps, match.gameSize);
 
+	console.log('player is ', player.turn)
+
 	setTurns(match, player)
 
 	// handleTurn(match);
 }
 
 function setTurns(match, player) {
+	console.log('player is ', player.turn)
 	match.round.circuit.currentLeader = player
 	player.socket.emit("turn play on");
 	match.round.circuit.turnToPlay = player.turn;
+	console.log('setting turn to ', player.turn)
 	match.round.circuit.endTurn = match.players.length;
 }
 
@@ -648,6 +667,8 @@ function nextCircuit(match) {
 	io.to(match.matchId).emit('new circuit')
 	match.round.circuit.bestCard = {number: -1, color: 'none'}
 	match.round.circuit.cardPile = []					// Reset card pile
+	console.log('player is ', match.round.circuit.currentLeader.turn)
+
 	setTimeout(() => setTurns(match, match.round.circuit.currentLeader), 6000)
 }
 
@@ -766,7 +787,7 @@ function updateCardsRequested(socket) {
 	
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
-		var player = findPlayerById( socket.id);
+		var player = findPlayerById(socket.id);
 		player.socket.emit("update cards", player.cards);
 	}
 }
