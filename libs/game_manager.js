@@ -433,6 +433,7 @@ function callBet(match) {
 	else {
 		console.log('here')
 		match.round.roundBetter = match.round.currentBetters[0];
+		console.log('round better : ', match.round.roundBetter.socket.id)
 		// console.log(match.round.roundBetter)
 		io.to(match.matchId).emit("end betting");
 		startRound(match);
@@ -462,7 +463,11 @@ function handlePass(socket) {
 	var match = findMatchBySocketId(socket.id);
 	var player = findPlayerById(socket.id);
 
-	match.round.currentBetters = match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);	
+	console.log('passing: ', socket.id)
+	console.log('current betters : ', match.round.currentBetters)
+	match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);	
+	console.log('current betters : ', match.round.currentBetters)
+
 	callBet(match);
 }
 

@@ -265,7 +265,7 @@ function draw() {
 /////////  Resizing  \\\\\\\\\
 // ------------------------- \
 function setSlotsPosition(slots, x, y, multiplyer) {
-	console.log('slot length : ', slots.length)
+	// console.log('slot length : ', slots.length)
 	for (var i in slots) {
 		 // console.log('setting x ',canvas.width * x + canvas.width / slots.length * i * multiplyer - cardWidth / 2 )
 		 slots[i].position = {
@@ -290,11 +290,29 @@ function handleResize() {
 	cardWidth = 90 * r;
 	cardHeight = cardWidth * 1.5;
 
-	if (handSlots) { setSlotsPosition(handSlots, handSlotsX, handSlotsY, handSlotsMulti) };
-	if (chooseSlots) { setSlotsPosition(chooseSlots, chooseSlotsX, chooseSlotsY, chooseSlotsMulti) };
-	if (selectedHandSlot) { setSlotsPosition(selectedHandSlot.card, handSlotsX, handSlotsY, selectedHandSlot.slotNum) };
-	if (selectedChooseSlot) { setSlotsPosition(selectedChooseSlot.card, chooseSlotsX, chooseSlotsY, selectedChooseSlot.slotNum) };
-	if (circuitPile) { setSlotsPosition(circuitPile, circuitPileX, circuitPileY, circuitPileMulti)}
+	if (handSlots) { 
+		console.log('handslots') 
+		setSlotsPosition(handSlots, handSlotsX, handSlotsY, handSlotsMulti) 
+	};
+	if (chooseSlots) { 
+		console.log('chooseSLots') 
+		setSlotsPosition(chooseSlots, chooseSlotsX, chooseSlotsY, chooseSlotsMulti) 
+	};
+	if (selectedHandSlot) { 
+		console.log('selectedhand') 
+
+		setSlotsPosition(selectedHandSlot.card, handSlotsX, handSlotsY, selectedHandSlot.slotNum) 
+	};
+	if (selectedChooseSlot) {
+		console.log('selected choose') 
+ 
+		setSlotsPosition(selectedChooseSlot.card, chooseSlotsX, chooseSlotsY, selectedChooseSlot.slotNum) 
+	};
+	if (circuitPile) { 
+		console.log('cirucit pule') 
+
+		setSlotsPosition(circuitPile, circuitPileX, circuitPileY, circuitPileMulti)
+	}
 }
 
 ///////  isOn Helpers  \\\\\\\
@@ -605,13 +623,13 @@ var canvas,
 	
 	team = undefined,
 
-	handSlots = [], 
+	handSlots = undefined, 
 	handSlotsX = 0.05,
 	handSlotsY = 0.775,
 	handSlotsMulti = 1
 	displayCardSlots = false,
 
-	chooseSlots = [], 
+	chooseSlots = undefined, 
 	chooseSlotsX = 0.28,
 	chooseSlotsY = 0.35,
 	chooseSlotsMulti = 0.55,
