@@ -57,13 +57,18 @@ socket.on("turn on choose trumps", function() {
 	turnOnChooseTrumps()
 })
 
-socket.on("start round with trumps", function(newTrumps) {
-	startRoundWithTrumps(newTrumps)
+socket.on("start round with trumps", function(newTrumps, gameSize) {
+	startRoundWithTrumps(newTrumps, gameSize)
+	initializeCircuitPile(gameSize)
 })
 
 socket.on("turn play on", function() {
 	turnOnPlay();
 });
+
+socket.on('play card', function(card, slot) {
+	addToCircuitPile(card, slot)
+})
 
 socket.on("waiting on bet winner to choose cards", function() {
 	turnOnLabels(["playerChoosingCards"])
@@ -71,21 +76,37 @@ socket.on("waiting on bet winner to choose cards", function() {
 
 socket.on("waiting on bet winner to choose trumps", function() {
 	turnOffChooseSlots();
+})
+	
+socket.on("unknown card played", function() {
+	unknownCardPlayed();
+});
+	
+socket.on("unknown card played", function() {
+	unknownCardPlayed();
+});
+	
+socket.on("waiting on bet winner to choose trumps", function() {
+	turnOffChooseSlots();
 	turnOffLabels(["playerChoosingCards"])
 	turnOnLabels(["playerChoosingTrumps"])
 })
 
-socket.on("unknown card played", function() {
-	unknownCardPlayed();
+socket.on("circuit winners", function(winningTeam, points) {
+	displayCircuitResult(winningTeam, points);
 });
 
-socket.on("circuit winners", function(winningTeam) {
-	displayCircuitResult(winningTeam);
-});
+socket.on('new circuit', function() {
+	resetCircuitPile();
+})
 
 socket.on("round winners", function(winningTeam) {
 	// Display winner or looser team
 	displayRoundResult(winningTeam);
+})
+
+socket.on('new round', function() {
+	resetRound();
 })
 
 socket.on("abbort match", function(reason) {
@@ -109,14 +130,27 @@ socket.on("no rematch", function() {
 });
 
 //////////  Functions  \\\\\\\\\\
-/**
- * Called when a player clicks to search for a lobby
- */
-function enterQueue() {
+function enterQueueTwo() {
 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	socket.emit("enter queue");
-	turnOffLabels(["play"])
+	socket.emit("enter queue two");
+	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
+	turnOnLabels(["searching"])
+}
+
+function enterQueueFour() {
+	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
+	socket.emit("enter queue four");
+	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
+	turnOnLabels(["searching"])
+}
+
+function enterQueueSix() {
+	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
+	socket.emit("enter queue six");
+	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
 	turnOnLabels(["searching"])
 }
 
@@ -136,7 +170,7 @@ function enterMatch(newTeam) {
  */
 function updateCards(cards) {
 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
+	handSlots = undefined;
 	handSlots = [cards.length];
 
 	for (var i = 0; i < cards.length; i++) {
@@ -195,7 +229,7 @@ function updateChooseCards(cards, slot) {
 	// // if (logFull) // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	this.displaySlot = slot
 
-	console.log(displaySlot)
+	// console.log(displaySlot)
 
 	chooseSlots = [cards.length];
 
@@ -227,13 +261,13 @@ function turnOffChooseSlots() {
 
 function turnOnTrumps() {
 	turnOnLabels(['chooseTrumps'])
-	turnOnClickableLabels(['Yellow', 'Green', 'Blue', 'Black'])
+	turnOnClickableLabels(['Yellow', 'Green', 'Red', 'Black'])
 }
 
 function turnOnChooseTrumps() {
 	// display new trumps value
 	turnOnLabels(['chooseTrumps'])
-	turnOnClickableLabels(['Yellow', 'Blue', 'Black', 'Green'])
+	turnOnClickableLabels(['Yellow', 'Red', 'Black', 'Green'])
 }
 
 function chooseTrumps(newTrumps){
@@ -250,31 +284,47 @@ function submitChosenCards() {
 function submitTrumps() {
 	if (trumps != undefined) {
 		socket.emit('set trumps', trumps)
-		turnOffLabels(['chooseTrumps', 'Yellow', 'Blue', 'Green', 'Black', 'submitTrumps'])
+		turnOffLabels(['chooseTrumps', 'Yellow', 'Red', 'Green', 'Black', 'submitTrumps'])
 	}
 }
 
 function startRoundWithTrumps(newTrumps){
-	turnOffLabels(['playerChoosingTrumps', 'submitSelectedCard'])
+	turnOffLabels(['playerChoosingTrumps'])
 	trumps = newTrumps
 	updateTrumps()
-	turnOnLabels(['trumps', 'waitingToPlay'])
+	turnOnLabels(['trumps', 'waitingToPlay', 'submitSelectedCard'])
 	disableLabels(['submitSelectedCard'])
+}
+
+function initializeCircuitPile(gameSize) {
+	
+	circuitPile = [];
+	for (var i = 0; i < gameSize; i++) {
+		circuitPile.push({
+			number: undefined, 
+			color: undefined,
+			position: {
+				x: circuitPileX,
+				y: circuitPileY
+			}
+		})
+	}
+	console.log('initialized pile ', circuitPile)
+	displayPile = true;
+	handleResize();
 }
 
 function submitSelectedCard() {
 	if (canPlayCard && selectedHandSlot) {
-		socket.emit('play card', selectedHandSlot.slotNum)
+		socket.emit('play card', selectedHandSlot.card)
 		disableLabels(['submitSelectedCard'])
 		turnOffLabels(['yourTurn'])
-		turnOnLabels(['waitingToPlay'])
 		handSlots[selectedHandSlot.slotNum].number = undefined;
 		handSlots[selectedHandSlot.slotNum].color = undefined;
 		selectedHandSlot= undefined;
 		console.log('turning off play')
 
 		canPlayCard = false;
-		disableLabels(['submitSelectedCard'])
 	}
 }
 
@@ -283,51 +333,91 @@ function turnOnPlay(){
 	canPlayCard = true;
 	turnOffLabels(['waitingToPlay'])
 	turnOnLabels(['yourTurn', 'submitSelectedCard'])
-	disableLabels(['submitSelectedCard'])
+	console.log(selectedHandSlot)
+	if (selectedHandSlot) {
+		enableLabels(['submitSelectedCard'])
+	}
+	else { disableLabels(['submitSelectedCard']) }
+	handleResize()
 }
 
 function turnOffPlay(){
 	console.log('turning off play')
 
 	canPlayCard = false;
+	displayPile = false;
 	disableLabels(['submitSelectedCard'])
-	turnOffLabels(['submitSelectedCard'])
+	turnOffLabels(['submitSelectedCard', 'yourTurn'])
 }
 
-function playCard(index) {
-	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+// function playCard(index) {
+// 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	if (canPlayCard) {
-		socket.emit("play card", index);
-		turnOffPlay();
-	}
-}
+// 	if (canPlayCard) {
+// 		socket.emit("play card", index);
+// 		turnOffPlay();
+// 	}
+// }
 
-function unknownCardPlayed() {
+function displayCircuitResult(winningTeam, points) {
 	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-	opponentCard = {isUnknown: true};
-}
-
-function displayCircuitResult(team) {
-	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	turnOffLabels(['yourTurn', 'waitingToPlay', 'trumps'])
 
 	if (this.team.id === winningTeam.id) {
-		// Add winning label here
+		labels['roundTeamPoints'].text = `Round Points: ${points}`
+		labels['circuitResult'].text = 'Hand Won'
+		labels['circuitResult'].color1 = secondaryColor;
+		labels['circuitResult'].color2 = toColor("Green");
 	} else {
-		// Add loosing label here
+		labels['roundOpponentPoints'].text = `Round Points: ${points}`
+		labels['circuitResult'].text = 'Hand Lost'
+		labels['circuitResult'].color1 = secondaryColor;
+		labels['circuitResult'].color2 = toColor("Red");
 	}
+	turnOnLabels(['roundTeamPoints', 'roundOpponentPoints', 'circuitResult', 'totalTeamPoints', 'totalOpponentPoints'])
 }
 
+function resetCircuitPile() {
+	turnOffLabels(['circuitResult'])
+	turnOnLabels(['waitingToPlay'])
+	for (var i in circuitPile) {
+		circuitPile[i].number = undefined;
+		circuitPile[i].color = undefined;
+	}
+}
 
 function displayRoundResult(winningTeam) {
 	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	turnOffLabels(['yourTurn', 'waitingToPlay', 'circuitResult'])
 
+	circuitPile = undefined
+	
 	if (this.team.id === winningTeam.id) {
-		// Add winning label here
+		labels['totalTeamPoints'].text = `Total Points: ${winningTeam.points}`
+		labels['roundResult'].text = 'Round Won'
+		labels['roundResult'].color1 = secondaryColor;
+		labels['roundResult'].color2 = toColor("Green");
 	} else {
-		// Add loosing label here
+		labels['totalOpponentPoints'].text = `Total Points: ${winningTeam.points}`
+		labels['roundResult'].text = 'Round Lost'
+		labels['roundResult'].color1 = secondaryColor;
+		labels['roundResult'].color2 = toColor("Red");
 	}
+	turnOnLabels(['totalTeamPoints', 'totalOpponentPoints', 'roundResult'])
+}
+
+function resetRound() {
+	turnOffPlay()
+	labels["roundTeamPoints"].text = "Round Points: 0"
+	labels["roundOpponentPoints"].text = "Round Points: 0"
+	turnOffLabels(['roundResult'])
+	circuitPile = undefined
+	turnOnLabels(["currentBet", "betting"])
+
+	// for (var i in circuitPile) {
+	// 	circuitPile[i].number = undefined;
+	// 	circuitPile[i].color = undefined;
+	// }
 }
 
 function prepareForEnd(){
@@ -364,6 +454,9 @@ function prepareForEnd(){
 	for (var i = 0; i < chooseSlots.length; i++) {
 		chooseSlots[i] = undefined;
 	}
+
+	if(circuitPile)
+	circuitPile = undefined
 }
 
 function abbortMatch() {
@@ -398,7 +491,7 @@ function exitMatch() {
 
 	socket.emit("leave match");
 
-	turnOnClickableLabels(["play"])
+	turnOnClickableLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
 	turnOnLabels(["logo"])
 }
 

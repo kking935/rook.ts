@@ -7,7 +7,7 @@ var app = express();
 var http = require("http").Server(app);
 var io = require("./libs/game_manager").listen(http);  // Start Socket.io server and let game_manager handle those connections
 
-app.set("port", (process.env.PORT || 3001));  // Use either given port or 3001 as default
+app.set("port", (process.env.PORT || 80));  // Use either given port or 3001 as default
 app.use(express.static("public"));  // Staticly serve pages, using directory 'public' as root 
 
 // User connects to server

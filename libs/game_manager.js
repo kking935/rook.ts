@@ -7,18 +7,20 @@ var logFull = false;
 var logFull = false;
 
 var players = [];
-var queue = [];
+var queueTwo = [];
+var queueFour = [];
+var queueSix = [];
 var matches = [];
 var rematchRequests = [];
 
 var goalPoints = 500;
-const teamSize = 1;
+const teamSize = 2;
 const numTeams = 2;
-const handSize = 10;
+// const handSize = 1;
 const potSize = 5;
 
-const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
-const colors = ["Yellow", "Green", "Blue", "Black"];
+const numbers = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
+const colors = ["Yellow", "Green", "Red", "Black"];
 const rook = {
 	number: 20,
 	color: "ROOK"
@@ -36,8 +38,16 @@ module.exports.listen = function(app) {
 			playerDisconnected(socket);
 		});
 
-		socket.on("enter queue", function() {
-			enterQueue(socket);
+		socket.on("enter queue two", function() {
+			enterQueueTwo(socket);
+		});
+
+		socket.on("enter queue four", function() {
+			enterQueueFour(socket);
+		});
+
+		socket.on("enter queue six", function() {
+			enterQueueSix(socket);
 		});
 
 		socket.on("leave queue", function() {
@@ -60,9 +70,9 @@ module.exports.listen = function(app) {
 			setTrumps(socket, newTrumps);
 		})
 
-		socket.on("play card", function(index) {
-			console.log('play card')
-			playCard(socket, index);
+		socket.on("play card", function(card) {
+			// console.log('play card')
+			playCard(socket, card);
 		});
 
 		socket.on("leave match", function() {
@@ -117,20 +127,56 @@ function findPlayerById(socketId) {
  * Handles the event when a new player enters the queue (clicks on the play button to join a lobby)
  * @param socket	The socket of the player who entered the queue 
  */
-function enterQueue(socket) {
+function enterQueueTwo(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	var player = findPlayerById(socket.id);
-	if (queue.indexOf(player) === -1) {
-		queue.push(player);
+	if (queueTwo.indexOf(player) === -1) {
+		queueTwo.push(player);
 		socket.emit("queue entered");
-		if (queue.length >= numTeams * teamSize) {
+		if (queueTwo.length >= 2) {
 			var newPlayers = [];
-			var currentQueue = queue.length;
+			var currentQueue = queueTwo.length;
 			for (var x = 0; x < currentQueue ; x++) {
-				newPlayers.push(queue.shift())
+				newPlayers.push(queueTwo.shift())
 			}
-			createMatch(newPlayers);
+			createMatch(newPlayers, 5);
+		}
+	}
+}
+
+function enterQueueFour(socket) {
+	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
+	var player = findPlayerById(socket.id);
+	if (queueFour.indexOf(player) === -1) {
+		queueFour.push(player);
+		socket.emit("queue entered");
+		if (queueFour.length >= 4) {
+			var newPlayers = [];
+			var currentQueue = queueFour.length;
+			for (var x = 0; x < currentQueue ; x++) {
+				newPlayers.push(queueFour.shift())
+			}
+			createMatch(newPlayers, 10);
+		}
+	}
+}
+
+function enterQueueSix(socket) {
+	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
+	var player = findPlayerById(socket.id);
+	if (queueSix.indexOf(player) === -1) {
+		queueSix.push(player);
+		socket.emit("queue entered");
+		if (queueSix.length >= 6) {
+			var newPlayers = [];
+			var currentQueue = queueSix.length;
+			for (var x = 0; x < currentQueue ; x++) {
+				newPlayers.push(queueSix.shift())
+			}
+			createMatch(newPlayers, 7);
 		}
 	}
 }
@@ -143,9 +189,24 @@ function leaveQueue(socket) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	var player = findPlayerById(socket.id);
-	var index = queue.indexOf(player);
+	var index = queueTwo.indexOf(player);
+	if (index > -1){
+		queueTwo.splice(index, 1)
+		index = -1
+	}
+	else {
+		index = queueFour.indexOf(player)
+	}
 	if (index > -1) {
-		queue.splice(index, 1);
+		queueFour.splice(index, 1)
+		index = -1
+	}
+	else {
+		index = queueSix.indexOf(player)
+	}
+	if (index > -1) {
+		queueSix.splice(index, 1);
+		index = -1
 	}
 	socket.emit("queue left");
 }
@@ -154,7 +215,7 @@ function leaveQueue(socket) {
  * Creates a new match for the teams of players passed in
  * @param  participants 	The participlants to create a match for
  */
-function createMatch(participants) {
+function createMatch(participants, handSize) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 
@@ -181,22 +242,21 @@ function createMatch(participants) {
 			team: newTeams[Math.floor(participant % numTeams)],
 			turn: participant,
 			cards: dealHand(newDeck, handSize),
-			currentCard: undefined
 		};
 
 		newPlayers.push(playerObject);
 		participants[participant].socket.emit("update cards", playerObject.cards);
 	}
 
-	players = newPlayers;
-
 	var match = {
 		matchId: id,
 		deck: newDeck,
-		round: createRound(0, newDeck),
+		round: createRound(0, newDeck, newPlayers),
 		players: newPlayers,
 		teams: newTeams,
-		isOver: false
+		isOver: false,
+		gameSize: participants.length,
+		handSize: handSize
 	};
 
 	for (var z = 0;  z < participants.length; z++){
@@ -205,8 +265,8 @@ function createMatch(participants) {
 
 	matches.push(match);
 
-	for (var x = 0; x < players.length; x++) {
-		players[x].socket.emit("enter match", players[x].team);
+	for (var x = 0; x < match.players.length; x++) {
+		match.players[x].socket.emit("enter match", match.players[x].team);
 	}
 
 	var slot = 0;
@@ -216,17 +276,24 @@ function createMatch(participants) {
 
 	io.to(match.matchId).emit("update choose cards", match.round.pot, slot);
 
+	for (var i in newPlayers) {
+		for (var x in players) {
+			if (newPlayers[i].socket.id == players[x].socket.id) {
+				players[x] = newPlayers[i]
+			}
+		}
+	}
 	callBet(match);
 }
 
-function createRound(roundNumber, deck) {
+function createRound(roundNumber, deck, roundPlayers) {
 	var newRound = {
 		number: roundNumber,				// The round number
 		pot: dealHand(deck, potSize),		// The pot at the start of each round
 		turnToBet: 0,						// The turn for the bet
 		bet: 0,								// The bet for this round
 		roundBetter: undefined,				// The team that bet on this round
-		currentBetters: players.slice(0),			// Initialize the round's betters to be all the players
+		currentBetters: roundPlayers.slice(0),			// Initialize the round's betters to be all the players
 		trumps: undefined,					// The card color for trumps
 		circuit: createCircuit()				// The circuit of plays
 	}
@@ -235,10 +302,12 @@ function createRound(roundNumber, deck) {
 
 function createCircuit() {
 	var newCircuit = {
+		number: 0,							// The circuit number
 		cardPile: [],						// The current pile of cards
 		bestCard: {number: -1, color: 'none'},	// The current greatest card value
-		currentLeader: undefined,			// Player with the best card in this round's pile
+		currentLeader: 0,					// Player with the best card in this round's pile
 		turnToPlay: 0,						// Which player's turn it is
+		endTurn: 0
 	}
 	return newCircuit;
 }
@@ -349,17 +418,23 @@ function findMatchBySocketId(socketId) {
  */
 function callBet(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+	
 	var turn = match.round.turnToBet;
 	if (turn < match.round.currentBetters.length && match.round.currentBetters.length != 1) {
+		console.log('the turn is ', turn)
 		match.round.currentBetters[turn].socket.emit("turn on bet");
 	}
 	else if (match.round.currentBetters.length > 1) {
 		match.round.turnToBet = 0;
+		console.log('reseting turn to bet back to 0')
+
 		callBet(match);
 	}
 	else {
-		// console.log('here')
+		console.log('here')
 		match.round.roundBetter = match.round.currentBetters[0];
+		console.log('round better : ', match.round.roundBetter.socket.id)
+		// console.log(match.round.roundBetter)
 		io.to(match.matchId).emit("end betting");
 		startRound(match);
 	}
@@ -388,7 +463,11 @@ function handlePass(socket) {
 	var match = findMatchBySocketId(socket.id);
 	var player = findPlayerById(socket.id);
 
+	console.log('passing: ', socket.id)
+	console.log('current betters : ', match.round.currentBetters)
 	match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);	
+	console.log('current betters : ', match.round.currentBetters)
+
 	callBet(match);
 }
 
@@ -396,6 +475,7 @@ function startRound(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
 	for (var i = 0; i < match.players.length; i++) {
+		// console.log(match.players[i])
 		if (match.players[i] === match.round.roundBetter ) {
 			match.round.roundBetter.socket.emit('turn on choose cards');
 		}
@@ -410,16 +490,18 @@ function updateChosenCards(socket, cards) {
 
 	var match = findMatchBySocketId(socket.id)
 	var player = findPlayerById(socket.id);
-	player.cards = cards;
 
 	for (var i = 0; i < match.players.length; i++) {
-		if (match.players[i] === player) {
+		console.log(i)
+		if (match.players[i].socket == socket) {
+			console.log('calling turn on choose trumps')
 			match.players[i].socket.emit("turn on choose trumps");
 		} else {
 			// console.log('emitting waitingo on better to choose trumps')
 			match.players[i].socket.emit("waiting on bet winner to choose trumps")
 		}
 	}
+	player.cards = cards;
 
 }
 
@@ -431,14 +513,22 @@ function setTrumps(socket, newTrumps) {
 	
 	match.round.trumps = newTrumps;
 
-	io.to(match.matchId).emit("start round with trumps", newTrumps);
+	io.to(match.matchId).emit("start round with trumps", newTrumps, match.gameSize);
 
-	match.round.circuit.turnToPlay = player.turn
-	match.round.circuit.endTurn = player.turn - 1;
-	if (match.round.circuit.endTurn < 0) {
-		match.round.circuit.endTurn = match.players.length - 1
-	}
-	handleTurn(match);
+	console.log('player is ', player.turn)
+
+	setTurns(match, player)
+
+	// handleTurn(match);
+}
+
+function setTurns(match, player) {
+	console.log('player is ', player.turn)
+	match.round.circuit.currentLeader = player
+	player.socket.emit("turn play on");
+	match.round.circuit.turnToPlay = player.turn;
+	console.log('setting turn to ', player.turn)
+	match.round.circuit.endTurn = match.players.length;
 }
 
 /**
@@ -446,37 +536,35 @@ function setTrumps(socket, newTrumps) {
  * @param socket 	The socket of the player to play a card for
  * @param index 	The index in the card array of the player's hand
  */
-function playCard(socket, index) {
-	console.log('here')
+function playCard(socket, card) {
+	// console.log('here')
 	// if (logFull) // console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	console.log('playing card')
+	// console.lo('playing card')
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
-		for (var z = 0;  z < match.players.length; z++){
-			// console.log("PlayerCARD : ", match.players[z].cards);
-		}
-
+		console.log('playing card')
 		var player = findPlayerById(socket.id);
 		var isTurn = (player.turn === match.round.circuit.turnToPlay);
-		var isValidIndex = index >= 0 && index < player.cards.length;
-		var cardExists = player.cards[index] !== undefined;
+		var cardExists = card !== undefined;
 
-		if (isTurn && isValidIndex && cardExists && !player.currentCard) {
+		if (isTurn && cardExists) {
 			console.log('about to fight cards')
-			player.currentCard = player.cards[index];
-			player.cards[index] = undefined;
+			// console.log('at line 468')
 
-			if (fightCards(match, player.currentCard)) {
-				match.round.circuit.bestCard = player.currentCard;
-				match.round.circuit.currentLeader = player.team;
+			if (fightCards(match, card)) {
+				// console.log('at 471')
+				match.round.circuit.bestCard = card;
+				match.round.circuit.currentLeader = player;
 			}
+			
+			io.to(match.matchId).emit('play card', card, match.round.circuit.cardPile.length)
 
-			match.round.circuit.cardPile.push(player.currentCard);
+			match.round.circuit.cardPile.push(card);
 
 			match.round.circuit.turnToPlay++;
+			match.round.circuit.endTurn--;
 
-
-			console.log('about to handle turn', match.round.circuit.turnToPlay)
+			// console.log('about to handle turn', match.round.circuit.turnToPlay)
 			handleTurn(match);
 		}
 	}
@@ -485,17 +573,16 @@ function playCard(socket, index) {
 function handleTurn(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
-	// console.log('in handle turn')
+	console.log('in handle turn')
 	// console.log(match.round)
-	var turn = match.round.circuit.turnToPlay;
-	console.log('turn to play: ', turn)
+	// console.log('turn to play: ', match.round.circuit.turnToPlay )
 
-	if (turn != match.round.circuit.endTurn) {
-		if (turn >= match.players.length) {
-			turn = 0;
+	if (match.round.circuit.endTurn > 0) {
+		if (match.round.circuit.turnToPlay >= match.players.length) {
 			match.round.circuit.turnToPlay = 0;
 		}
-		match.players[turn].socket.emit("turn play on");
+		console.log('telling player to play ', match.round.circuit.turnToPlay)
+		match.players[match.round.circuit.turnToPlay].socket.emit("turn play on");
 	}
 	else {
 		processCircuit(match);
@@ -505,10 +592,27 @@ function handleTurn(match) {
 function fightCards(match, newCard) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
-	var newCardWins = newCard.number > match.round.circuit.bestCard.number;
+	console.log('new card: ', newCard)
+	console.log('current best: ', match.round.circuit.bestCard)
+	// console.log('inside fight card')
+	var newCardWins = false;
+	if ((match.round.circuit.bestCard && match.round.circuit.bestCard.number !== 1) && newCard.number > match.round.circuit.bestCard.number || newCard.number === 1){
+		newCardWins = true;
+	} 
 
-	if (match.round.circuit.bestCard.color === match.round.trumps && newCard.color != match.round.trumps) {
+	var newCardIsTrumps = (newCard.color === match.round.trumps) || (newCard.color === "ROOK")
+	var currCardIsTrumps = (match.round.circuit.bestCard.color === match.round.trumps) || (match.round.circuit.bestCard.color === "ROOK")
+	
+	if (currCardIsTrumps && !newCardIsTrumps) {
 		newCardWins = false;
+	}
+	else if (!currCardIsTrumps && newCardIsTrumps) {
+		newCardWins = true;
+	} 
+	else if (!currCardIsTrumps && !newCardIsTrumps) {
+		if (match.round.circuit.bestCard.color != 'none' && match.round.circuit.bestCard.color != newCard.color) {
+			newCardWins = false;
+		}
 	}
 
 	return newCardWins;
@@ -523,10 +627,11 @@ function fightCards(match, newCard) {
 function processCircuit(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 
+	console.log('processing circuit')
 	var totalPoints = 0;
 	for (var card = 0; card < match.round.circuit.cardPile.length; card++) {
 		switch(match.round.circuit.cardPile[card].number) {
-			case "rook":
+			case 20:
 				totalPoints += 20;
 				break;
 			case 1:
@@ -544,19 +649,33 @@ function processCircuit(match) {
 		}
 	}
 
+	// console.log('curr leader: ',match.round.circuit.currentLeader)
 	match.round.circuit.currentLeader.team.points += totalPoints;
 
-	io.to(match.matchId).emit("circuit winners", match.round.circuit.currentLeader.team);
+	console.log('circuit winners')
+	io.to(match.matchId).emit("circuit winners", match.round.circuit.currentLeader.team, totalPoints);
+
 
 	match.round.circuit.number++;
 
-	if (match.round.circuit.number === handSize) {
-		processRound(match);
-	} else {
-		nextCircuit(match);
-	}
+	console.log('circuit number  : ', match.round.circuit.number, ' handsize ', match.handSize)
+	setTimeout(() => {
+		if (match.round.circuit.number == match.handSize) {
+			processRound(match);
+		} else {
+			nextCircuit(match);
+		}
+	}, 5000);
 }
 
+function nextCircuit(match) {
+	io.to(match.matchId).emit('new circuit')
+	match.round.circuit.bestCard = {number: -1, color: 'none'}
+	match.round.circuit.cardPile = []					// Reset card pile
+	console.log('player is ', match.round.circuit.currentLeader.turn)
+
+	setTurns(match, match.round.circuit.currentLeader)
+}
 
 /**
  * Processes the end of each round, determining who won
@@ -566,7 +685,9 @@ function processCircuit(match) {
  */
 function processRound(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
+	
+	console.log('processing round')
+	
 	if (match.round.bet <= match.round.roundBetter.team.roundPoints) {
 		match.round.roundBetter.team.matchPoints += match.round.roundBetter.team.roundPoints;
 	}
@@ -577,6 +698,7 @@ function processRound(match) {
 	if (match.round.roundBetter.team.points >= goalPoints) {
 		endMatch(match, match.round.roundBetter.team, "set");
 	} else {
+		console.log('next round')
 		io.to(match.matchId).emit("round winners", match.round.roundBetter.team);
 		nextRound(match);
 	}
@@ -588,20 +710,26 @@ function processRound(match) {
  */
 function nextRound(match) {
 	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
+
+	setTimeout(() => io.to(match.matchId).emit('new round'), 5000)
+
+	// io.to(match.matchId).emit('new circuit')
+	setTimeout(() => {
+		match.deck = shuffleDeck(generateDeck())
+		match.round = createRound(match.round.number + 1, match.deck, match.players)
 	
-	for (var i = 0; i < match.players.length; i++) {
-		match.players[i].currentCard = undefined;
-		for (var j = 0; j < match.players[i].cards.length; j++) {
-			if (match.players[i].cards[j] === undefined) {
-				match.players[i].cards[j] = drawCard(match.deck);
-			}
+		for (var i = 0; i < match.players.length; i++) {
+			match.players[i].cards = dealHand(match.deck, match.handSize);
+			match.players[i].socket.emit('update cards', match.players[i].cards)
 		}
-	}
-
-	match.round.number++;
-	match.round.turnToBet = 0;
-
-	handleTurn(match)
+	
+		var slot = 0;
+		if (match.players.length === 6) {
+			slot = -1;
+		}
+		io.to(match.matchId).emit("update choose cards", match.round.pot, slot);
+		callBet(match)
+	}, 6000)
 }
 
 /**
@@ -664,7 +792,7 @@ function updateCardsRequested(socket) {
 	
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
-		var player = findPlayerById( socket.id);
+		var player = findPlayerById(socket.id);
 		player.socket.emit("update cards", player.cards);
 	}
 }
