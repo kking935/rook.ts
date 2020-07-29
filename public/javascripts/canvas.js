@@ -505,8 +505,8 @@ function chooseYellowTrumps() {
 	chooseTrumps("Yellow")
 }
 
-function chooseBlueTrumps() {
-	chooseTrumps("Blue")
+function chooseRedTrumps() {
+	chooseTrumps("Red")
 }
 
 function chooseBlackTrumps() {
@@ -549,7 +549,7 @@ function init() {
 	
 	labels["chooseTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.1}, "Choose trumps color   ", 50, false, true, false, labelFont);
 	labels["Yellow"] = new Label(secondaryColor, toColor("Yellow"), {x: 0.2, y: 0.3}, "Yellow", 50, false, true, false, labelFont, chooseYellowTrumps);
-	labels["Blue"] = new Label(secondaryColor, toColor("Blue"), {x: 0.4, y: 0.3}, "Blue", 50, false, true, false, labelFont, chooseBlueTrumps);
+	labels["Red"] = new Label(secondaryColor, toColor("Red"), {x: 0.4, y: 0.3}, "Red", 50, false, true, false, labelFont, chooseRedTrumps);
 	labels["Green"] = new Label(secondaryColor, toColor("Green"), {x: 0.6, y: 0.3}, "Green", 50, false, true, false, labelFont, chooseGreenTrumps);
 	labels["Black"] = new Label(secondaryColor, toColor("Black"), {x: 0.8, y: 0.3}, "Black", 50, false, true, false, labelFont, chooseBlackTrumps);
 	labels["submitTrumps"] = new Label(primaryColor, secondaryColor, {x: 0.5, y: 0.675}, "Choose Trumps", 50, false, false, false, labelFont, submitTrumps)

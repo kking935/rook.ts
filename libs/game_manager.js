@@ -19,7 +19,7 @@ const numTeams = 2;
 // const handSize = 1;
 const potSize = 5;
 
-const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
+const numbers = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1];
 const colors = ["Yellow", "Green", "Red", "Black"];
 const rook = {
 	number: 20,
@@ -596,9 +596,9 @@ function fightCards(match, newCard) {
 	console.log('current best: ', match.round.circuit.bestCard)
 	// console.log('inside fight card')
 	var newCardWins = false;
-	if (newCard.number > match.round.circuit.bestCard.number || newCard.number === 1){
+	if ((match.round.circuit.bestCard && match.round.circuit.bestCard.number !== 1) && newCard.number > match.round.circuit.bestCard.number || newCard.number === 1){
 		newCardWins = true;
-	}
+	} 
 
 	var newCardIsTrumps = (newCard.color === match.round.trumps) || (newCard.color === "ROOK")
 	var currCardIsTrumps = (match.round.circuit.bestCard.color === match.round.trumps) || (match.round.circuit.bestCard.color === "ROOK")
@@ -674,7 +674,7 @@ function nextCircuit(match) {
 	match.round.circuit.cardPile = []					// Reset card pile
 	console.log('player is ', match.round.circuit.currentLeader.turn)
 
-	setTimeout(() => setTurns(match, match.round.circuit.currentLeader), 6000)
+	setTurns(match, match.round.circuit.currentLeader)
 }
 
 /**

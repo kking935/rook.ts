@@ -254,13 +254,13 @@ function turnOffChooseSlots() {
 
 function turnOnTrumps() {
 	turnOnLabels(['chooseTrumps'])
-	turnOnClickableLabels(['Yellow', 'Green', 'Blue', 'Black'])
+	turnOnClickableLabels(['Yellow', 'Green', 'Red', 'Black'])
 }
 
 function turnOnChooseTrumps() {
 	// display new trumps value
 	turnOnLabels(['chooseTrumps'])
-	turnOnClickableLabels(['Yellow', 'Blue', 'Black', 'Green'])
+	turnOnClickableLabels(['Yellow', 'Red', 'Black', 'Green'])
 }
 
 function chooseTrumps(newTrumps){
@@ -277,7 +277,7 @@ function submitChosenCards() {
 function submitTrumps() {
 	if (trumps != undefined) {
 		socket.emit('set trumps', trumps)
-		turnOffLabels(['chooseTrumps', 'Yellow', 'Blue', 'Green', 'Black', 'submitTrumps'])
+		turnOffLabels(['chooseTrumps', 'Yellow', 'Red', 'Green', 'Black', 'submitTrumps'])
 	}
 }
 
@@ -401,6 +401,8 @@ function displayRoundResult(winningTeam) {
 
 function resetRound() {
 	turnOffPlay()
+	labels["roundTeamPoints"].text = "Round Points: 0"
+	labels["roundOpponentPoints"].text = "Round Points: 0"
 	turnOffLabels(['roundResult'])
 	circuitPile = undefined
 	turnOnLabels(["currentBet", "betting"])
