@@ -18,4 +18,4 @@ npm start
 I plan to add my own explaination of the rules based on how my family plays the game, but for now you can get a good run-down of the rules [here](https://www.pagat.com/kt5/rook.html)
 
 ### Credits
-The code from this game was built off code from another project called [Card-Fu](https://github.com/tobloef/card-fu) developed by [@tobloef](https://github.com/tobloef)
+The code for this game was built off code from another project called [Card-Fu](https://github.com/tobloef/card-fu) developed by [@tobloef](https://github.com/tobloef)
