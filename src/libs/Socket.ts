@@ -3,7 +3,7 @@ import socketio, { Socket } from "socket.io";
 import { Server } from "https";
 import { enterQueueFour, enterQueueSix, enterQueueTwo, handleBet, handlePass, leaveMatch, leaveQueue, playCard, playerConnect, playerDisconnected, rematchRequested, setTrumps, updateCardsRequested, updateChosenCards } from "./game_manager";
 
-module.exports.listen = (app: Server ) => {
+export const listen = (app: Server ) => {
 	const io = socketio.listen(app);
     io.on("connection", (socket: Socket) => {
         
@@ -64,3 +64,5 @@ module.exports.listen = (app: Server ) => {
 	});
 	return io;
 };
+
+export default listen

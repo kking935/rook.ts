@@ -8,7 +8,8 @@ const chalk = require('chalk');
 // the realtime connection to the client.
 
 var http = require("http").Server(app);
-// var io = require("./libs/game_manager").listen(http);  // Start Socket.io server and let game_manager handle those connections
+import * as socket from "./libs/Socket"
+socket.listen(http);  // Start Socket.io server and let game_manager handle those connections
 
 // Configure dotenv
 dotenv.config();
@@ -16,6 +17,8 @@ dotenv.config();
 const port = process.env.PORT || 3000;
 
 app.use(express.static("public"));  // Statically serve pages, using directory 'public' as root 
+
+app.set("port", (port))
 
 // User connects to server
 app.get("/", function(req, res) {
@@ -28,8 +31,8 @@ app.get("*", function(req, res) {
 	res.status(404).send("Error 404 - Page not found");
 });
 
-app.listen(port, () => {
-	console.log(`Server running on port ${port}`);
-	console.log(chalk.blue(`Go check it out on http://localhost:${port}`));
+http.listen(app.get("port"), () => {
+	console.log(`Server running on port ${app.get("port")}`);
+	console.log(chalk.blue(`Go check it out on http://localhost:${app.get("port")}`));
 
 });
