@@ -1,3 +1,4 @@
+// const io = io.connect();
 /**
  * This file manages the games client's logic. It's here that
  * Socket.io connections are handled and functions from canvas.js

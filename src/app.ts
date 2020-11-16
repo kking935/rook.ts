@@ -1,20 +1,21 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import * as dotenv from 'dotenv';
 const app: Application = express();
+const chalk = require('chalk');
 
 // This file starts both the Express server, used to serve the
 // actual webpage, and the Socket.io server, used to handle
 // the realtime connection to the client.
 
 var http = require("http").Server(app);
-var io = require("./libs/game_manager").listen(http);  // Start Socket.io server and let game_manager handle those connections
+// var io = require("./libs/game_manager").listen(http);  // Start Socket.io server and let game_manager handle those connections
 
 // Configure dotenv
 dotenv.config();
 
 const port = process.env.PORT || 3000;
 
-app.use(express.static("public"));  // Staticly serve pages, using directory 'public' as root 
+app.use(express.static("public"));  // Statically serve pages, using directory 'public' as root 
 
 // User connects to server
 app.get("/", function(req, res) {
@@ -28,5 +29,7 @@ app.get("*", function(req, res) {
 });
 
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+	console.log(`Server running on port ${port}`);
+	console.log(chalk.blue(`Go check it out on http://localhost:${port}`));
+
 });
