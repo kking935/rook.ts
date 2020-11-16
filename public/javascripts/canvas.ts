@@ -1,28 +1,21 @@
-// This file manages the game's logic for most visual things and contains various functions
+// This file manages the game's logic for most visual things and contains various export consts
 // for drawing on and manipulating the canvas, used by the game client.
+
+import { CardPosition } from "../Types/Card";
+import { LabelType } from "../Types/Label";
 
 /////  Label Constructor  \\\\
 // ------------------------- \\ 
-function Label(color1, color2, position, text, size, visible, clickable, disabled, font, callback) {
+export const CreateLabel = (label: LabelType) => {
 	 //  // if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
-	// x and y are integers betweem 0 and 1. Use as percentages.
-	this.position = position;
-	this.text = text;
-	this.size = size;
-	this.visible = visible;
-	this.clickable = clickable;
-	this.disabled = disabled;
-	this.down = false;
-	this.font = font;
-	this.callback = callback;
-	this.color1 = color1;
-	this.color2 = color2;
+	label.down = false;
+	return label
 }
 
 /////  Label Helpers  \\\\\\\\
 // ------------------------- \\
-function turnOnClickableLabels(labelsList) {
+export const turnOnClickableLabels = (labelsList) => {
 	for (var i in labelsList) {
 		// console.log('Turning on clickable label: ', labels[`${labelsList[i]}`])
 		labels[`${labelsList[i]}`].visible = true;
@@ -31,7 +24,7 @@ function turnOnClickableLabels(labelsList) {
 	}
 }
 
-function addToCircuitPile(card, slot) {
+export const addToCircuitPile = (card, slot) => {
 	console.log(circuitPile)
 	turnOnLabels(['waitingToPlay'])
 	circuitPile[slot].number = card.number;
@@ -41,7 +34,7 @@ function addToCircuitPile(card, slot) {
 	// handleResize();
 }
 
-function turnOnLabels(labelsList) {
+export const turnOnLabels = (labelsList) => {
 	// console.log('-------------- Turning on labels -----------------')
 
 	for (var i in labelsList) {
@@ -50,7 +43,7 @@ function turnOnLabels(labelsList) {
 	}
 }
 
-function disableLabels(labelsList) {
+export const disableLabels = (labelsList) => {
 	// console.log('-------------- Disabling labels -----------------')
 
 	for (var i in labelsList) {
@@ -60,7 +53,7 @@ function disableLabels(labelsList) {
 	}
 }
 
-function enableLabels(labelsList) {
+export const enableLabels = (labelsList) => {
 
 	for (var i in labelsList) {
 		labels[`${labelsList[i]}`].disabled = false;
@@ -68,7 +61,7 @@ function enableLabels(labelsList) {
 	}
 }
 
-function turnOffLabels(labelsList) {
+export const turnOffLabels = (labelsList) => {
 	// console.log('-------------- Turning off labels -----------------')
 	for (var i in labelsList) {
 		// console.log('labelsList[i]: ', labelsList[i])
@@ -81,7 +74,7 @@ function turnOffLabels(labelsList) {
 
 /////////  Drawing  \\\\\\\\\\
 // ------------------------- \\
-function toColor(colorStr) {
+export const toColor = (colorStr) => {
 	var color = undefined;
 	switch (colorStr) {
 		case "Yellow":
@@ -106,14 +99,14 @@ function toColor(colorStr) {
 	return color;
 }
 
-function drawEmptyPileSlot(position) {
+export const drawEmptyPileSlot = (position: Position) => {
 	ctx.fillStyle = "#a0a0a0";
 	ctx.fillRect(position.x, position.y, cardWidth, cardHeight);
 	ctx.strokeStyle = "#000000";
 	ctx.strokeRect(position.x, position.y, cardWidth, cardHeight);
 }
 
-function drawCard(card, scale) {
+export const drawCard = (card: CardPosition, scale: number) => {
 	if (!scale) {
 		scale = 1;
 	}
@@ -137,7 +130,7 @@ function drawCard(card, scale) {
 	ctx.fillText(card.color, card.position.x + cardWidth * scale / 2, card.position.y + cardHeight * scale * 0.7);	
 }
 
-function drawUnknownCard(position, scale) {
+export const drawUnknownCard = (position: CardPosition, scale: number) => {
 	if (!scale) {
 		scale = 1;
 	}
@@ -156,7 +149,7 @@ function drawUnknownCard(position, scale) {
 	ctx.fillText("?", position.x + cardWidth * scale / 2, position.y + cardHeight * 0.5 * scale);
 }
 
-function drawEmptySlot(slotNum, x, y, slots) {
+export const drawEmptySlot = (slotNum: string | number, x: number, y: number, slots: string | any[]) => {
 	var x = canvas.width * x + canvas.width / slots.length * slotNum - cardWidth / 2;
 	var y = canvas.height * y;
 
@@ -166,7 +159,7 @@ function drawEmptySlot(slotNum, x, y, slots) {
 	ctx.strokeRect(x, y, cardWidth, cardHeight);
 }
 
-function drawLabel(label) {
+export const drawLabel = (label: any) => {
 	ctx.textBaseline = "middle";
 	ctx.textAlign = "center";
 	ctx.font = (label.size * r) + "px " + label.font;
@@ -185,7 +178,7 @@ function drawLabel(label) {
 	}
 }
 
-function draw() {
+export const draw = () => {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
 	if (displayPile) {
@@ -264,7 +257,7 @@ function draw() {
 
 /////////  Resizing  \\\\\\\\\
 // ------------------------- \
-function setSlotsPosition(slots, x, y, multiplyer) {
+export const setSlotsPosition = (slots, x, y, multiplyer) => {
 	// console.log('slot length : ', slots.length)
 	for (var i in slots) {
 		 // console.log('setting x ',canvas.width * x + canvas.width / slots.length * i * multiplyer - cardWidth / 2 )
@@ -275,7 +268,7 @@ function setSlotsPosition(slots, x, y, multiplyer) {
 	}
 }
 
-function handleResize() {
+export const handleResize = () => {
 	 //  // if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	if (window.innerWidth < window.innerHeight * aspect) {
@@ -317,7 +310,7 @@ function handleResize() {
 
 ///////  isOn Helpers  \\\\\\\
 // ------------------------- \\ 
-function isOnSlot(event, slot) {
+export const isOnSlot = (event, slot) => {
 	var x = (event.pageX - canvas.offsetLeft),
 		y = (event.pageY - canvas.offsetTop);
 	if (slot) {
@@ -329,7 +322,7 @@ function isOnSlot(event, slot) {
 	return false;
 }
 
-function checkSlots(slots) {
+export const checkSlots = (slots) => {
 	for (var i in slots) {
 		if (isOnSlot(event, slots[i])) {
 			if (!clickCursor) {
@@ -341,7 +334,7 @@ function checkSlots(slots) {
 	}
 }
 
-function isOnLabel(event, label) {
+export const isOnLabel = (event, label) => {
 	var x = (event.pageX - canvas.offsetLeft),
 		y = (event.pageY - canvas.offsetTop);
 	if (label.clickable) {
@@ -362,7 +355,7 @@ function isOnLabel(event, label) {
 
 ///////  Mouse Events  \\\\\\\
 // ------------------------- \\ 
-function handleMouseMove(event) {
+export const handleMouseMove = (event) => {
 
 	checkSlots(handSlots);
 	checkSlots(chooseSlots);
@@ -383,7 +376,7 @@ function handleMouseMove(event) {
 	clickCursor = false;
 }
 
-function handleMouseDown(event) {
+export const handleMouseDown = (event) => {
 	 //  // if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	for (i in labels) {
@@ -394,7 +387,7 @@ function handleMouseDown(event) {
 	}
 }
 
-function handleMouseUp(event) {
+export const handleMouseUp = (event) => {
 	 //  // if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	for (var i in labels) {
@@ -476,7 +469,7 @@ function handleMouseUp(event) {
 
 /////////  Betting  \\\\\\\\\\
 // ------------------------- \\
-function updateCurrentBet(newBet, bettingTeamId) {
+export const updateCurrentBet = (newBet, bettingTeamId) => {
 	currBet = newBet;
 	labels["currentBet"].text = "Current Bet: " + currBet;
 	labels["currentBet"].color1 = "#0f0f0f";
@@ -491,35 +484,35 @@ function updateCurrentBet(newBet, bettingTeamId) {
 
 /////////  Trumps  \\\\\\\\\\\
 // ------------------------- \\
-function updateSubmitTrumps() {
+export const updateSubmitTrumps = () => {
 	labels["submitTrumps"].text = "Choose " + trumps;
 	labels["submitTrumps"].color2 = toColor(trumps);
 }
 
-function updateTrumps() {
+export const updateTrumps = () => {
 	labels["trumps"].text = 'Trumps: ' + trumps;
 	labels["trumps"].color2 = toColor(trumps);
 }
 
-function chooseYellowTrumps() {
+export const chooseYellowTrumps = () => {
 	chooseTrumps("Yellow")
 }
 
-function chooseRedTrumps() {
+export const chooseRedTrumps = () => {
 	chooseTrumps("Red")
 }
 
-function chooseBlackTrumps() {
+export const chooseBlackTrumps = () => {
 	chooseTrumps("Black")
 }
 
-function chooseGreenTrumps() {
+export const chooseGreenTrumps = () => {
 	chooseTrumps("Green")
 }
 
 //////////  Canvas  \\\\\\\\\\
 // ------------------------- \\ 
-function init() {
+export const init = () => {
 	 // if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	canvas = document.getElementById("game-canvas");
@@ -585,7 +578,7 @@ function init() {
 	];
 }
 
-function animate() {
+export const animate = () => {
 	requestAnimFrame(animate);
 	draw();
 }
@@ -595,7 +588,7 @@ function animate() {
 // ---------------------------------------------------------------------
 
 //////////  Initialize  \\\\\\\\\\
-window.requestAnimFrame = (function () {
+window.requestAnimFrame = () => {
 	return window.requestAnimationFrame ||
 		   window.webkitRequestAnimationFrame ||
 		   window.mozRequestAnimationFrame ||
@@ -604,7 +597,7 @@ window.requestAnimFrame = (function () {
 		   function (callback, element) {
 			   window.setTimeout(callback, 1000 / 60);
 		   };
-})();
+}
 
 // Initialize hand variables
 var canvas, 
@@ -617,7 +610,7 @@ var canvas,
 	primaryColor = "#9a9a9a",
 	secondaryColor = "#000000",
 
-	labels = [],
+	labels: LabelType[] = [],
 	dottedLabels = [],
 	labelFont = "RagingRedLotusBB",
 	
