@@ -16,7 +16,6 @@ const queueSix: any[] = []
 const matches: Match[] = []
 // var rematchRequests = [];
 
-const teamSize = 2
 const numTeams = 2
 // const handSize = 1;
 let potSize = 5
