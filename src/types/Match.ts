@@ -1,7 +1,7 @@
-import { Card } from "./Card";
-import { Player } from "./Player";
-import { Round } from "./Round";
-import { Team } from "./Team";
+import { Card } from './Card'
+import { Player } from './Player'
+import { Round } from './Round'
+import { Team } from './Team'
 
 export type Match = {
   players: Player[]; 

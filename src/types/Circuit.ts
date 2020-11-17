@@ -1,5 +1,5 @@
-import { Card } from "./Card";
-import { Player } from "./Player";
+import { Card } from './Card'
+import { Player } from './Player'
 
 export type Circuit = {
     number: number;

@@ -1,6 +1,6 @@
-import { Socket } from "socket.io";
-import { Card } from "./Card";
-import { Team } from "./Team";
+import { Socket } from 'socket.io'
+import { Card } from './Card'
+import { Team } from './Team'
 
 export type Player = {
     socket: Socket,

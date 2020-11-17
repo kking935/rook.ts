@@ -1,6 +1,6 @@
-import { Card } from "./Card";
-import { Circuit } from "./Circuit";
-import { Player } from "./Player";
+import { Card } from './Card'
+import { Circuit } from './Circuit'
+import { Player } from './Player'
 
 export type Round = {
     number: number;
