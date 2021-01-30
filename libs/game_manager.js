@@ -717,7 +717,8 @@ function nextRound(match) {
 	setTimeout(() => {
 		match.deck = shuffleDeck(generateDeck())
 		match.round = createRound(match.round.number + 1, match.deck, match.players)
-	
+		match.round.bet = 0
+		
 		for (var i = 0; i < match.players.length; i++) {
 			match.players[i].cards = dealHand(match.deck, match.handSize);
 			match.players[i].socket.emit('update cards', match.players[i].cards)

@@ -134,7 +134,7 @@ function enterQueueTwo() {
 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	socket.emit("enter queue two");
-	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
+	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers", "logo"])
 	turnOnLabels(["searching"])
 }
 
@@ -142,7 +142,7 @@ function enterQueueFour() {
 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	socket.emit("enter queue four");
-	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
+	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers", "logo"])
 	turnOnLabels(["searching"])
 }
 
@@ -150,7 +150,7 @@ function enterQueueSix() {
 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	
 	socket.emit("enter queue six");
-	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers"])
+	turnOffLabels(["twoPlayers", "fourPlayers", "sixPlayers", "logo"])
 	turnOnLabels(["searching"])
 }
 
@@ -160,7 +160,7 @@ function enterMatch(newTeam) {
 	team = newTeam;
 	playerPoints = [];
 
-	turnOffLabels(["searching", "logo"]);
+	turnOffLabels(["searching"]);
 	turnOnLabels(["currentBet", "betting"])
 }
 
@@ -208,7 +208,7 @@ function handleBet() {
 	
 	if (canBet) {
 		var newBet = currBet + betIncrements;
-		labels["currentBet"].text = 'Current Bet: ' + newBet;
+		labels["currentBet"].text = 'CURRENT BET: ' + newBet;
 		
 		socket.emit("bet", newBet);
 		turnOffBet()
@@ -293,6 +293,7 @@ function startRoundWithTrumps(newTrumps){
 	trumps = newTrumps
 	updateTrumps()
 	turnOnLabels(['trumps', 'waitingToPlay', 'submitSelectedCard'])
+	turnOnLabels(['roundTeamPoints', 'roundOpponentPoints', 'totalTeamPoints', 'totalOpponentPoints'])
 	disableLabels(['submitSelectedCard'])
 }
 
@@ -350,27 +351,18 @@ function turnOffPlay(){
 	turnOffLabels(['submitSelectedCard', 'yourTurn'])
 }
 
-// function playCard(index) {
-// 	// // if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-// 	if (canPlayCard) {
-// 		socket.emit("play card", index);
-// 		turnOffPlay();
-// 	}
-// }
-
 function displayCircuitResult(winningTeam, points) {
 	// if (logFull) // // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	turnOffLabels(['yourTurn', 'waitingToPlay', 'trumps'])
 
 	if (this.team.id === winningTeam.id) {
-		labels['roundTeamPoints'].text = `Round Points: ${points}`
-		labels['circuitResult'].text = 'Hand Won'
+		labels['roundTeamPoints'].text = `TEAM ROUND POINTS: ${points}`
+		labels['circuitResult'].text = 'HAND WON'
 		labels['circuitResult'].color1 = secondaryColor;
 		labels['circuitResult'].color2 = toColor("Green");
 	} else {
-		labels['roundOpponentPoints'].text = `Round Points: ${points}`
-		labels['circuitResult'].text = 'Hand Lost'
+		labels['roundOpponentPoints'].text = `OPPONENT ROUND POINTS: ${points}`
+		labels['circuitResult'].text = 'HAND LOST'
 		labels['circuitResult'].color1 = secondaryColor;
 		labels['circuitResult'].color2 = toColor("Red");
 	}
@@ -379,7 +371,7 @@ function displayCircuitResult(winningTeam, points) {
 
 function resetCircuitPile() {
 	turnOffLabels(['circuitResult'])
-	turnOnLabels(['waitingToPlay'])
+	turnOnLabels(['waitingToPlay', 'trumps'])
 	for (var i in circuitPile) {
 		circuitPile[i].number = undefined;
 		circuitPile[i].color = undefined;
@@ -393,13 +385,13 @@ function displayRoundResult(winningTeam) {
 	circuitPile = undefined
 	
 	if (this.team.id === winningTeam.id) {
-		labels['totalTeamPoints'].text = `Total Points: ${winningTeam.points}`
-		labels['roundResult'].text = 'Round Won'
+		labels['totalTeamPoints'].text = `TEAM TOTAL POINTS: ${winningTeam.points}`
+		labels['roundResult'].text = 'ROUND WON'
 		labels['roundResult'].color1 = secondaryColor;
 		labels['roundResult'].color2 = toColor("Green");
 	} else {
-		labels['totalOpponentPoints'].text = `Total Points: ${winningTeam.points}`
-		labels['roundResult'].text = 'Round Lost'
+		labels['totalOpponentPoints'].text = `OPPONENT TOTAL POINTS: ${winningTeam.points}`
+		labels['roundResult'].text = 'ROUND LOST'
 		labels['roundResult'].color1 = secondaryColor;
 		labels['roundResult'].color2 = toColor("Red");
 	}
@@ -408,11 +400,12 @@ function displayRoundResult(winningTeam) {
 
 function resetRound() {
 	turnOffPlay()
-	labels["roundTeamPoints"].text = "Round Points: 0"
-	labels["roundOpponentPoints"].text = "Round Points: 0"
-	turnOffLabels(['roundResult'])
+	labels["roundTeamPoints"].text = "TEAM ROUND POINTS: 0"
+	labels["roundOpponentPoints"].text = "OPPONENT ROUND POINTS: 0"
+	turnOffLabels(['totalTeamPoints', 'totalOpponentPoints', 'roundResult', 'roundTeamPoints', 'roundOpponentPoints'])
 	circuitPile = undefined
 	turnOnLabels(["currentBet", "betting"])
+
 
 	// for (var i in circuitPile) {
 	// 	circuitPile[i].number = undefined;
@@ -464,8 +457,7 @@ function abbortMatch() {
 	prepareForEnd();
 
 	disableLabels(["rematch"])
-	labels["reason"].text = "A Player Disconnected";
-	labels["reason"].size = 90;
+	labels["reason"].text = "A PLAYER DISCONNECTED";
 	turnOnLabels(["reason", "rematch"])
 	turnOnClickableLabels(["main menu"])
 }

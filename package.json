@@ -1,7 +1,7 @@
 {
-  "name": "cardfu",
-  "description": "Simple game based on Club Penguins Card-Jitsu",
-  "author": "Tobias Loefgren",
+  "name": "king-rook",
+  "description": "Rook, played the King way.",
+  "author": "Ken King",
   "version": "0.1.0",
   "main": "server.js",
   "scripts": {
