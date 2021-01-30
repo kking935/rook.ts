@@ -196,6 +196,11 @@ function drawBackground(label, color, scale) {
 		calcWidth, 
 		calcHeight
 	)
+	ctx.strokeStyle = "#000000";
+	ctx.strokeRect(		canvas.width * label.position.x - calcWidth / 2, 
+		canvas.height * label.position.y - calcHeight / 1.9, 
+		calcWidth, 
+		calcHeight);
 }
 
 function draw() {
