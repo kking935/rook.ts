@@ -3,19 +3,29 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>KING ROOK</title>
-		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+		<!-- <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"> -->
 		<link rel="stylesheet" type="text/css" href="stylesheets/style.css">
 		<link rel="shortcut icon" type="image/png" href="/images/rook_favicon.png"/>
 		<meta name=viewport content="width=device-width, initial-scale=1">
+		<script
+		src="https://kit.fontawesome.com/b9cd9d5230.js"
+		crossorigin="anonymous"
+		></script>
 	</head>
 
 	<body>
+		<div class='header grid-container'>
+			<div class="title">KING ROOK</div>
+			<div class="learn-more">LEARN MORE</div>
+		</div>
+		<!-- <div class="message"><i class="arrow-icon far fa-arrow-alt-circle-right"></i>Start a game</div> -->
+
 		<div id="content" class="page">
 			<canvas id="game-canvas" class="center-block" width="0" height="0"></canvas>
 		</div>
 
 		<script src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.0/js.cookie.js"></script>
+		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.0/js.cookie.js"></script> -->
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="javascripts/game_client.js" type="text/javascript"></script>
 		<script src="javascripts/canvas.js" type="text/javascript"></script>
