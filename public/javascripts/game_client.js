@@ -21,6 +21,7 @@ var canPlayCard = false;
 
 var opponentCard, playerCard, winningTeam, matchEndReason, readyToEnd;
 var currBet = 0;
+var betIncrease = 5;
 var betIncrements = 5;
 
 
@@ -187,50 +188,74 @@ function updateCards(cards) {
 
 function turnOnBet(){
 	turnOffLabels(["betting"]);
-	turnOnClickableLabels(["bet", "pass"])
+	turnOnClickableLabels(["bet", "pass", "increaseBet", "decreaseBet"])
 	canBet = true;
+	labels["bet"].text = `Bet ${currBet + betIncrease}`
+
+	if (betIncrease <= betIncrements) {
+		disableLabels(["decreaseBet"])
+		labels["decreaseBet"].background = false
+	}
 }
 
 function turnOffBet(){
 	turnOnLabels(['betting'])
-	turnOffLabels(["bet", "pass"])
+	turnOffLabels(["bet", "pass", "increaseBet", "decreaseBet"])
 	canBet = false;
-}
-
-function endBet() {
-	// // console.log('\n\nending betting')
-	turnOffLabels(['betting', 'bet', 'pass', 'currentBet'])
-	canBet = false;
+	resetBetIncrease()
 }
 
 function handleBet() {
-	 //  // // // if (logFull) // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-	if (canBet) {
-		var newBet = currBet + betIncrements;
-		labels["currentBet"].text = 'CURRENT BET: ' + newBet;
-		
-		socket.emit("bet", newBet);
-		turnOffBet()
-	}
-}
-
-function handlePass() {
-	//  // // // if (logFull) // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-   
    if (canBet) {
-	   socket.emit("pass");
-	   turnOnLabels(['betting'])
-	   turnOffLabels(['bet', 'pass'])
+	   var newBet = currBet + betIncrease;
+	   labels["currentBet"].text = 'CURRENT BET: ' + newBet;
+	   socket.emit("bet", newBet);
+	   turnOffBet()
    }
 }
 
+function handleIncreaseBet() {
+  if (canBet) {
+	  betIncrease += betIncrements;
+	  labels["bet"].text = `Bet ${currBet + betIncrease}`
+	  if (betIncrease > betIncrements) {
+		labels['decreaseBet'].background = 'red'
+		enableLabels(["decreaseBet"])
+
+	}
+  }
+}
+
+function handleDecreaseBet() {
+	if (canBet && betIncrease > betIncrements) {
+		betIncrease -= betIncrements;
+		labels["bet"].text = `Bet ${currBet + betIncrease}`
+		if (betIncrease <= betIncrements) {
+			labels['decreaseBet'].background = false
+			disableLabels(["decreaseBet"])
+		}
+	}
+}
+  
+function resetBetIncrease() {
+   betIncrease = 5;
+}
+
+function handlePass() {
+  if (canBet) {
+	  socket.emit("pass");
+	  turnOnLabels(['betting'])
+	  turnOffLabels(['bet', 'pass'])
+  }
+}
+
+function endBet() {
+	turnOffLabels(['betting', 'bet', 'pass', 'currentBet', 'decreaseBet', 'increaseBet'])
+	canBet = false;
+}
+
 function updateChooseCards(cards, slot) {
-	// // if (logFull) // console.log("%s(%s)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
 	this.displaySlot = slot
-
-	// console.log(displaySlot)
-
 	chooseSlots = [cards.length];
 
 	for (var i = 0; i < cards.length; i++) {
@@ -242,7 +267,6 @@ function updateChooseCards(cards, slot) {
 	}
 
 	displayChooseSlots = true;
-
 	handleResize();
 }
 

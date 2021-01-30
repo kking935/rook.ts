@@ -160,7 +160,7 @@ function drawLabel(label) {
 	ctx.font = (label.size * r) + "px " + label.font;
 	var shadowDistance = label.size / 20;
 	if (label.disabled) {
-		ctx.fillStyle = "#9a9a9a";
+		ctx.fillStyle = "grey";
 	} else {
 		ctx.fillStyle = label.color1;
 		ctx.fillText(label.text, canvas.width * label.position.x + (shadowDistance * r), canvas.height * label.position.y + (shadowDistance * r));
@@ -544,11 +544,14 @@ function init() {
 	labels["main menu"] = new Label(false, secondaryColor, 'white', {x: 0.5, y: 0.78}, "Main Menu", smallButtonSize, false, false, false, false, labelFont, exitMatch);
 	labels["reason"] = new Label(true, secondaryColor, 'white', {x: 0.5, y: topOffset}, "", mediumButtonSize, primaryBG, false, false, false, labelFont);
 	labels["currentBet"] = new Label(true, secondaryColor, 'white', {x: 0.5, y: topOffset}, "Current Bet: 0", mediumButtonSize, primaryBG, false, false, false, labelFont);
-	labels["bet"] = new Label(false, secondaryColor, 'white', {x: 0.65, y: 0.6}, "Bet", smallButtonSize, 'green', false, false, false, labelFont, handleBet);
-	labels["pass"] = new Label(false, secondaryColor, 'white', {x: 0.35, y: 0.6}, "Pass", smallButtonSize, 'red', false, false, false, labelFont, handlePass);
+	labels["bet"] = new Label(false, secondaryColor, 'white', {x: 0.65, y: 0.6}, `Bet ${currBet + betIncrease}`, smallButtonSize, 'green', false, false, false, labelFont, handleBet);
+	labels["increaseBet"] = new Label(false, primaryColor, secondaryColor, {x: 0.8, y: 0.6}, `+${betIncrements}`, smallButtonSize, 'green', false, false, false, labelFont, handleIncreaseBet);
+	labels["decreaseBet"] = new Label(false, primaryColor, secondaryColor, {x: 0.5, y: 0.6}, `-${betIncrements}`, smallButtonSize, 'red', false, false, false, labelFont, handleDecreaseBet);
+
+	labels["pass"] = new Label(false, secondaryColor, 'white', {x: 0.25, y: 0.6}, "Pass", smallButtonSize, 'grey', false, false, false, labelFont, handlePass);
 	labels["betting"] = new Label(false, secondaryColor, 'white', {x: 0.5, y: 0.6}, "Waiting for other players to bet   ", smallButtonSize, 'grey', false, false, false, labelFont);
-	labels["chooseCards"] = new Label(false, secondaryColor, 'white', {x: 0.5, y: topOffset}, "Choose which cards to discard   ", mediumButtonSize, primaryBG, false, false, false, labelFont);
-	labels["submitCards"] = new Label(false, secondaryColor, 'white', {x: 0.5, y: 0.6}, "Discard cards", smallButtonSize, false, false, false, false, labelFont, submitChosenCards)
+	labels["chooseCards"] = new Label(true, secondaryColor, 'white', {x: 0.5, y: topOffset}, "Choose your hand   ", mediumButtonSize, primaryBG, false, false, false, labelFont);
+	labels["submitCards"] = new Label(false, secondaryColor, 'white', {x: 0.5, y: 0.6}, "Proceed", smallButtonSize, false, false, false, false, labelFont, submitChosenCards)
 	labels["chooseTrumps"] = new Label(true, secondaryColor, 'white', {x: 0.5, y: topOffset}, "Choose trumps color   ", mediumButtonSize, primaryBG, false, false, false, labelFont);
 	labels["Yellow"] = new Label(false, secondaryColor, 'white', {x: 0.2, y: 0.3}, "Yellow", smallButtonSize, toColor("Yellow"), false, false, false, labelFont, chooseYellowTrumps);
 	labels["Red"] = new Label(false, secondaryColor, 'white', {x: 0.4, y: 0.3}, "Red", smallButtonSize, toColor("Red"), false, false, false, labelFont, chooseRedTrumps);
