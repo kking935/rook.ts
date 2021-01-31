@@ -215,8 +215,8 @@ body {
 
 canvas {
 	background-color: #42b47b;
-	border: 2px solid rgb(255, 255, 255);
-    border-radius: 50px;
+	border: 0.5px solid rgb(255, 255, 255);
+    border-radius: 30px;
     margin: 0;
     z-index: 0;
     

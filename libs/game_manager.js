@@ -91,8 +91,6 @@ module.exports.listen = function(app) {
  * @param socket 	The socket of the player to disconnect
  */
 function playerDisconnected(socket) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	var player = findPlayerById(socket.id);
 	var index = players.indexOf(player);
 	if (index > -1) {
@@ -107,8 +105,6 @@ function playerDisconnected(socket) {
  * @param socketId	The socket id of the player
  */
 function findPlayerById(socketId) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	for (var i = 0; i < players.length; i++) {
 		if (players[i].socket.id === socketId) {
 			return players[i];
@@ -122,8 +118,6 @@ function findPlayerById(socketId) {
  * @param socket	The socket of the player who entered the queue 
  */
 function enterQueueTwo(socket) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	var player = findPlayerById(socket.id);
 	if (queueTwo.indexOf(player) === -1) {
 		queueTwo.push(player);
@@ -140,8 +134,6 @@ function enterQueueTwo(socket) {
 }
 
 function enterQueueFour(socket) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	var player = findPlayerById(socket.id);
 	if (queueFour.indexOf(player) === -1) {
 		queueFour.push(player);
@@ -158,8 +150,6 @@ function enterQueueFour(socket) {
 }
 
 function enterQueueSix(socket) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	var player = findPlayerById(socket.id);
 	if (queueSix.indexOf(player) === -1) {
 		queueSix.push(player);
@@ -180,8 +170,6 @@ function enterQueueSix(socket) {
  * @param socket 	The socket of the player to remove from the queue
  */
 function leaveQueue(socket) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var player = findPlayerById(socket.id);
 	var index = queueTwo.indexOf(player);
 	if (index > -1){
@@ -210,9 +198,6 @@ function leaveQueue(socket) {
  * @param  participants 	The participlants to create a match for
  */
 function createMatch(participants, handSize) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
-
 	if (participants.length === 6) {
 		this.potSize = 3;
 	} else {
@@ -310,8 +295,6 @@ function createCircuit() {
  * Creates an unique ID for a new match
  */
 function createId() {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var id = "";
 	var charset = "ABCDEFGHIJKLMNOPQRSTUCWXYZabcdefghijklmnopqrtsuvwxyz1234567890";
 	for (var i = 0; i < 16; i++) {
@@ -328,8 +311,6 @@ function createId() {
  * @return deck	The newly generated deck of cards
  */
 function generateDeck() {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var deck = [];
 	for (var color = 0; color < colors.length; color++) {
 		for (var number = 0; number < numbers.length; number++) {
@@ -348,8 +329,6 @@ function generateDeck() {
  * @param deck 	The deck to deal from
  */
 function dealHand(deck, numCards) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var hand = [];
 	for (var card = 0; card < numCards; card++) {
 		hand.push(drawCard(deck));
@@ -362,8 +341,6 @@ function dealHand(deck, numCards) {
  * @param deck 	The deck to draw a card from
  */
 function drawCard(deck) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	return deck.shift();
 }
 
@@ -373,8 +350,6 @@ function drawCard(deck) {
  * @return deckCopy 	The shuffled copy of the original deck of cards 
  */
 function shuffleDeck(deck) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var deckCopy = deck.slice();
 	for (var i = deckCopy.length - 1; i > 0; i--) {
 		var j = Math.floor(Math.random() * (i + 1));
@@ -393,8 +368,6 @@ function shuffleDeck(deck) {
  * @param socketId 	The id of the socket of the player whos match we're looking for
  */
 function findMatchBySocketId(socketId) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	for (var i = 0; i < matches.length; i++) {
 		for (var j = 0; j < matches[i].players.length; j++) {
 			if (matches[i].players[j].socket.id === socketId) {
@@ -411,24 +384,16 @@ function findMatchBySocketId(socketId) {
  * @param match 
  */
 function callBet(match) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var turn = match.round.turnToBet;
 	if (turn < match.round.currentBetters.length && match.round.currentBetters.length != 1) {
-		console.log('the turn is ', turn)
 		match.round.currentBetters[turn].socket.emit("turn on bet");
 	}
 	else if (match.round.currentBetters.length > 1) {
 		match.round.turnToBet = 0;
-		console.log('reseting turn to bet back to 0')
-
 		callBet(match);
 	}
 	else {
-		console.log('here')
 		match.round.roundBetter = match.round.currentBetters[0];
-		console.log('round better : ', match.round.roundBetter.socket.id)
-		// console.log(match.round.roundBetter)
 		io.to(match.matchId).emit("end betting");
 		startRound(match);
 	}
@@ -456,20 +421,12 @@ function handleBet(socket, bet) {
 function handlePass(socket) {
 	var match = findMatchBySocketId(socket.id);
 	var player = findPlayerById(socket.id);
-
-	console.log('passing: ', socket.id)
-	console.log('current betters : ', match.round.currentBetters)
 	match.round.currentBetters.splice(match.round.currentBetters.indexOf(player), 1);	
-	console.log('current betters : ', match.round.currentBetters)
-
 	callBet(match);
 }
 
 function startRound(match) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	for (var i = 0; i < match.players.length; i++) {
-		// console.log(match.players[i])
 		if (match.players[i] === match.round.roundBetter ) {
 			match.round.roundBetter.socket.emit('turn on choose cards');
 		}
@@ -480,18 +437,13 @@ function startRound(match) {
 }
 
 function updateChosenCards(socket, cards) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	var match = findMatchBySocketId(socket.id)
 	var player = findPlayerById(socket.id);
 
 	for (var i = 0; i < match.players.length; i++) {
-		console.log(i)
 		if (match.players[i].socket == socket) {
-			console.log('calling turn on choose trumps')
 			match.players[i].socket.emit("turn on choose trumps");
 		} else {
-			// console.log('emitting waitingo on better to choose trumps')
 			match.players[i].socket.emit("waiting on bet winner to choose trumps")
 		}
 	}
@@ -500,28 +452,17 @@ function updateChosenCards(socket, cards) {
 }
 
 function setTrumps(socket, newTrumps) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	var match = findMatchBySocketId(socket.id);
 	var player = findPlayerById(socket.id);
-	
 	match.round.trumps = newTrumps;
-
 	io.to(match.matchId).emit("start round with trumps", newTrumps, match.gameSize);
-
-	console.log('player is ', player.turn)
-
 	setTurns(match, player)
-
-	// handleTurn(match);
 }
 
 function setTurns(match, player) {
-	console.log('player is ', player.turn)
 	match.round.circuit.currentLeader = player
 	player.socket.emit("turn play on");
 	match.round.circuit.turnToPlay = player.turn;
-	console.log('setting turn to ', player.turn)
 	match.round.circuit.endTurn = match.players.length;
 }
 
@@ -531,9 +472,6 @@ function setTurns(match, player) {
  * @param index 	The index in the card array of the player's hand
  */
 function playCard(socket, card) {
-	// console.log('here')
-	// if (logFull) // console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	// console.lo('playing card')
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
 		console.log('playing card')
@@ -542,9 +480,6 @@ function playCard(socket, card) {
 		var cardExists = card !== undefined;
 
 		if (isTurn && cardExists) {
-			console.log('about to fight cards')
-			// console.log('at line 468')
-
 			if (fightCards(match, card)) {
 				// console.log('at 471')
 				match.round.circuit.bestCard = card;
@@ -552,25 +487,15 @@ function playCard(socket, card) {
 			}
 			
 			io.to(match.matchId).emit('play card', card, match.round.circuit.cardPile.length)
-
 			match.round.circuit.cardPile.push(card);
-
 			match.round.circuit.turnToPlay++;
 			match.round.circuit.endTurn--;
-
-			// console.log('about to handle turn', match.round.circuit.turnToPlay)
 			handleTurn(match);
 		}
 	}
 }
 
 function handleTurn(match) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
-	console.log('in handle turn')
-	// console.log(match.round)
-	// console.log('turn to play: ', match.round.circuit.turnToPlay )
-
 	if (match.round.circuit.endTurn > 0) {
 		if (match.round.circuit.turnToPlay >= match.players.length) {
 			match.round.circuit.turnToPlay = 0;
@@ -584,11 +509,6 @@ function handleTurn(match) {
 }
 
 function fightCards(match, newCard) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
-	console.log('new card: ', newCard)
-	console.log('current best: ', match.round.circuit.bestCard)
-	// console.log('inside fight card')
 	var newCardWins = false;
 	if ((match.round.circuit.bestCard && match.round.circuit.bestCard.number !== 1) && newCard.number > match.round.circuit.bestCard.number || newCard.number === 1){
 		newCardWins = true;
@@ -619,9 +539,6 @@ function fightCards(match, newCard) {
  * @param {*} winner 	The winning team's number
  */
 function processCircuit(match) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
-	console.log('processing circuit')
 	var totalPoints = 0;
 	for (var card = 0; card < match.round.circuit.cardPile.length; card++) {
 		switch(match.round.circuit.cardPile[card].number) {
@@ -678,10 +595,6 @@ function nextCircuit(match) {
  * @param {*} winner 	The winning team's number
  */
 function processRound(match) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
-	console.log('processing round')
-	
 	if (match.round.bet <= match.round.roundBetter.team.roundPoints) {
 		match.round.roundBetter.team.matchPoints += match.round.roundBetter.team.roundPoints;
 	}
@@ -703,8 +616,6 @@ function processRound(match) {
  * @param {Prep} match 
  */
 function nextRound(match) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	setTimeout(() => io.to(match.matchId).emit('new round'), 5000)
 
 	// io.to(match.matchId).emit('new circuit')
@@ -732,8 +643,6 @@ function nextRound(match) {
  * @param socket 
  */
 function leaveMatch(socket) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
 		if (!match.isOver) {
@@ -746,8 +655,6 @@ function leaveMatch(socket) {
 }
 
 function abbortMatch(match) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	io.to(match.matchId).emit("abbort match", "player left");
 	match.isOver = true;
 }
@@ -759,8 +666,6 @@ function abbortMatch(match) {
  * @param {*} reason 	The reason they won
  */
 function endMatch(match, winningTeam, reason) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-
 	io.to(match.matchId).emit("end match", winningTeam, reason);
 	match.isOver = true;
 }
@@ -770,8 +675,6 @@ function endMatch(match, winningTeam, reason) {
  * @param match	The match to remove 
  */
 function removeMatch(match) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var index = matches.indexOf(match);
 	if (index > -1) {
 		matches.splice(index, 1);
@@ -783,8 +686,6 @@ function removeMatch(match) {
  * @param {*} socket 
  */
 function updateCardsRequested(socket) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
 		var player = findPlayerById(socket.id);
@@ -797,8 +698,6 @@ function updateCardsRequested(socket) {
  * @param {*} socket 
  */
 function rematchRequested(socket) {
-	if (logFull) console.log("%s(%j)", arguments.callee.name, Array.prototype.slice.call(arguments).sort());
-	
 	var match = findMatchBySocketId(socket.id);
 	if (match) {
 		match.rematch += 1;
