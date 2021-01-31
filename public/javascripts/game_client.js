@@ -71,14 +71,6 @@ socket.on('waiting on bet winner to choose trumps', function () {
 	turnOffChooseSlots();
 });
 
-socket.on('unknown card played', function () {
-	unknownCardPlayed();
-});
-
-socket.on('unknown card played', function () {
-	unknownCardPlayed();
-});
-
 socket.on('waiting on bet winner to choose trumps', function () {
 	turnOffChooseSlots();
 	turnOffLabels(['playerChoosingCards']);
@@ -416,6 +408,8 @@ function resetCircuitPile() {
 		circuitPile[i].number = undefined;
 		circuitPile[i].color = undefined;
 	}
+	currBet = 0
+	labels['currentBet'].text = `CURRENT BET: ${currBet}`
 }
 
 function displayRoundResult(winningTeam) {
