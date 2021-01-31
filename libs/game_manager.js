@@ -1,17 +1,11 @@
-// This file handles all socket.io connections and manages the serverside game logic.
-
 var socketio = require("socket.io");
 const e = require("express");
-var logFull = false;
-
-var logFull = false;
 
 var players = [];
 var queueTwo = [];
 var queueFour = [];
 var queueSix = [];
 var matches = [];
-var rematchRequests = [];
 
 var goalPoints = 500;
 const teamSize = 2;

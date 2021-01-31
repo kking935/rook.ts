@@ -182,7 +182,7 @@ function drawLabel(label) {
 
 function drawBackground(label, color, scale) {
 	var curCanvasWidth = document.getElementById('game-canvas').width
-	var calcWidth = scale * label.text.length * label.size * (curCanvasWidth / 1500)
+	var calcWidth = scale * label.text.length * label.size * (curCanvasWidth / 1400)
 	if (label.banner) {
 		calcWidth = curCanvasWidth
 	} else if (label.text.length < 4) {
